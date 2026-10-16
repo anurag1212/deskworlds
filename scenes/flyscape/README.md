@@ -43,3 +43,8 @@ for the wider ecosystem of fly-connectome projects).
   cord, including the leg motor neurons a walking fly needs. If this world ever ships,
   prefer MaleCNS-derived packs, or fetch FlyWire data at first run with clear attribution
   rather than bundling it.
+
+`python3 tools/fetch_flywire_pack.py` builds the reduced circuit locally into
+`scenes/flyscape/data/` (git-ignored): 961 neurons (escape, steering, grooming and
+taste command populations plus their strongest partners), 17,952 signed synapses,
+a 23,210-point soma cloud, and the Shiu et al. 2024 LIF constants in `meta.json`.
