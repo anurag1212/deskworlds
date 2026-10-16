@@ -179,13 +179,14 @@ function createFly(index, random) {
     turnRate: 0,
     random,
   };
-  // Start scattered on the desk, all facing somewhere different.
+  // Start scattered on the desk, all facing somewhere different, inside the frame the
+  // camera actually shows.
   const angle = random() * TAU;
-  const radius = 2.5 + random() * 5;
+  const radius = 2.2 + random() * 3.4;
   fly.group.position.set(
     Math.cos(angle) * radius,
     0.004,
-    Math.sin(angle) * radius * 0.55 - 0.4,
+    Math.sin(angle) * radius * 0.45 + 0.3,
   );
   fly.group.rotation.y = fly.heading;
   return fly;
@@ -231,6 +232,17 @@ export function createFlies(scene, {
     return false;
   }
 
+  // Sugar outside the room's bounds is sugar no fly can ever reach; the walk would
+  // press a fly against an invisible wall with the cube still out of reach.
+  function reachable(point) {
+    return (
+      point.x >= bounds.minX &&
+      point.x <= bounds.maxX &&
+      point.z >= bounds.minZ &&
+      point.z <= bounds.maxZ
+    );
+  }
+
   // A walking destination on the fly's current surface, never inside a book or the mug.
   function pickWalkTarget(fly) {
     const top = fly.surface ? fly.surface.top : 0;
@@ -244,6 +256,10 @@ export function createFlies(scene, {
         x = bounds.minX + fly.random() * (bounds.maxX - bounds.minX);
         z = bounds.minZ + fly.random() * (bounds.maxZ - bounds.minZ);
       }
+      // A book is wider than the room's walking bounds; a destination off the edge of
+      // the frame would park a fly where nobody can see it.
+      x = clamp(x, bounds.minX, bounds.maxX);
+      z = clamp(z, bounds.minZ, bounds.maxZ);
       if (!insideObstacle(x, top + 0.1, z, 0.22)) {
         fly.target.set(x, top, z);
         fly.targetKind = "wander";
@@ -259,7 +275,7 @@ export function createFlies(scene, {
   function pickFlightTarget(fly, ctx, drive, fleeing) {
     if (!fleeing && drive.hungry) {
       const food = ctx.food.nearest(fly.group.position, 12);
-      if (food) {
+      if (food && reachable(food.position)) {
         fly.target.set(food.position.x, food.position.y + 0.35, food.position.z);
         fly.targetKind = "food";
         fly.targetFood = food;
@@ -325,7 +341,8 @@ export function createFlies(scene, {
       case "rest": {
         fly.timer -= dt;
         if (fly.timer > 0) break;
-        const food = drive.hungry ? ctx.food.nearest(position, 10) : null;
+        const candidate = drive.hungry ? ctx.food.nearest(position, 10) : null;
+        const food = candidate && reachable(candidate.position) ? candidate : null;
         if (food) {
           if (supportHeight(food.position.x, food.position.z) === currentTop) {
             fly.target.set(food.position.x, food.position.y, food.position.z);
@@ -404,8 +421,8 @@ export function createFlies(scene, {
           angleDelta(fly.heading, Math.atan2(toTarget.x, toTarget.z)) * Math.min(1, dt * 6);
         fly.heading += drive.steer * dt * 0.5;
         const step = Math.min(distance, WALK_SPEED * dt);
-        const nextX = position.x + Math.sin(fly.heading) * step;
-        const nextZ = position.z + Math.cos(fly.heading) * step;
+        const nextX = clamp(position.x + Math.sin(fly.heading) * step, bounds.minX, bounds.maxX);
+        const nextZ = clamp(position.z + Math.cos(fly.heading) * step, bounds.minZ, bounds.maxZ);
         const nextGround = supportHeight(nextX, nextZ);
         if (fly.surface && nextGround < fly.surface.top - 0.05) {
           // The book ran out under the feet: fly the rest of the way.
@@ -519,6 +536,8 @@ export function createFlies(scene, {
         if (distance > 0.05) {
           delta.divideScalar(distance);
           position.addScaledVector(delta, Math.min(distance, dt * 0.8));
+          position.x = clamp(position.x, bounds.minX, bounds.maxX);
+          position.z = clamp(position.z, bounds.minZ, bounds.maxZ);
           fly.heading += angleDelta(fly.heading, Math.atan2(delta.x, delta.z)) * dt * 8;
         }
         if (position.y <= fly.target.y + 0.01) {
@@ -552,8 +571,11 @@ export function createFlies(scene, {
         delta.copy(food.position).sub(position);
         delta.y = 0;
         const distance = delta.length();
-        if (distance > 0.25)
+        if (distance > 0.25) {
           position.addScaledVector(delta.divideScalar(distance), Math.min(distance - 0.22, dt * 0.5));
+          position.x = clamp(position.x, bounds.minX, bounds.maxX);
+          position.z = clamp(position.z, bounds.minZ, bounds.maxZ);
+        }
         fly.heading +=
           angleDelta(
             fly.heading,

@@ -12,19 +12,21 @@ import { randomGenerator, vec } from "./math.js";
 // destination when it has no better reason.
 
 export const DESK = Object.freeze({ halfWidth: 16.5, halfDepth: 7.6, top: 0 });
+// The walking and flying bounds are the part of the desk the camera actually shows;
+// a fly at the frame's edge is a fly nobody can watch.
 export const BOUNDS = Object.freeze({
-  minX: -13.2,
-  maxX: 13.2,
+  minX: -8,
+  maxX: 7,
   minY: 0.02,
   maxY: 7.8,
-  minZ: -5.6,
-  maxZ: 6.4,
+  minZ: -5.2,
+  maxZ: 4,
 });
 
 const BOOKS = [
-  { x: -6.6, z: -2.7, width: 4.9, height: 0.56, depth: 3.3, colour: 0x7c3b31, title: 0x9c6b46 },
-  { x: -6.32, z: -2.52, width: 4.35, height: 0.48, depth: 3.0, colour: 0x40573f, title: 0x9c6b46 },
-  { x: -6.05, z: -2.36, width: 3.8, height: 0.42, depth: 2.7, colour: 0x33405b, title: 0x9c6b46 },
+  { x: -6.6, z: -2.7, width: 4.9, height: 0.56, depth: 3.3, colour: 0x8a4438, title: 0xa8764e },
+  { x: -6.32, z: -2.52, width: 4.35, height: 0.48, depth: 3.0, colour: 0x4a6349, title: 0xa8764e },
+  { x: -6.05, z: -2.36, width: 3.8, height: 0.42, depth: 2.7, colour: 0x3d4c6a, title: 0xa8764e },
 ];
 const PAPERBACKS = [
   { x: 0.8, z: -3.5, width: 2.9, height: 0.3, depth: 3.6, colour: 0x6b4a63, title: 0xb9a06a },
@@ -96,7 +98,7 @@ export function createEnvironment(scene) {
   // The room behind: one wall, dark enough that the window reads as its light source.
   const wall = new THREE.Mesh(
     new THREE.PlaneGeometry(56, 22),
-    new THREE.MeshStandardMaterial({ color: 0x241b13, roughness: 1 }),
+    new THREE.MeshStandardMaterial({ color: 0x2b2116, roughness: 1 }),
   );
   wall.position.set(0, 7, -8.4);
   wall.receiveShadow = true;
@@ -104,19 +106,32 @@ export function createEnvironment(scene) {
 
   // The window: a pane of late sun. Emissive rather than lit, so it stays the brightest
   // thing in the room and the flies' landmark. Its values run above 1 on purpose; tone
-  // mapping brings them back down as glow.
-  const pane = new THREE.Mesh(
-    new THREE.PlaneGeometry(7.4, 8.6),
-    new THREE.MeshBasicMaterial({ color: new THREE.Color(1.55, 1.16, 0.72) }),
-  );
-  pane.position.set(-8.2, 4.7, -8.32);
-  scene.add(pane);
+  // mapping brings them back down as glow. The frame is the backing the pane sits on,
+  // with mullions crossing in front — a frame box in front of the pane would simply
+  // hide the light it frames. It sits inside the camera's view: the room's light source
+  // has to be visible or the desk reads as lit by nothing.
   const frame = new THREE.Mesh(
-    new THREE.BoxGeometry(7.9, 9.1, 0.16),
+    new THREE.BoxGeometry(6.9, 8.1, 0.2),
     new THREE.MeshStandardMaterial({ color: 0x33261a, roughness: 0.9 }),
   );
-  frame.position.set(-8.2, 4.7, -8.38);
+  frame.position.set(-6.0, 5.0, -8.46);
   scene.add(frame);
+  const pane = new THREE.Mesh(
+    new THREE.PlaneGeometry(6.4, 7.6),
+    // Above 1 so it is the brightest thing in the room, but only a little: pushed much
+    // higher, ACES tone mapping rolls the amber off to white. Fog stays off the pane so
+    // the far wall's haze does not grey the light itself.
+    new THREE.MeshBasicMaterial({ color: new THREE.Color(1.25, 0.88, 0.52), fog: false }),
+  );
+  pane.position.set(-6.0, 5.0, -8.3);
+  scene.add(pane);
+  const mullion = new THREE.MeshStandardMaterial({ color: 0x33261a, roughness: 0.9 });
+  const crossbar = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.18, 0.06), mullion);
+  crossbar.position.set(-6.0, 5.0, -8.26);
+  scene.add(crossbar);
+  const upright = new THREE.Mesh(new THREE.BoxGeometry(0.18, 7.6, 0.06), mullion);
+  upright.position.set(-6.0, 5.0, -8.26);
+  scene.add(upright);
 
   // The book stacks and the mug. The stacks land off-centre so the desk's open middle
   // stays clear for walking and for food.
@@ -196,7 +211,7 @@ export function createEnvironment(scene) {
     { name: "books", point: vec(-6.1, big.top + 0.5, -2.5) },
     { name: "paperbacks", point: vec(0.75, small.top + 0.5, -3.4) },
     { name: "mug", point: vec(MUG.x, MUG.height + 0.5, MUG.z) },
-    { name: "window", point: vec(-7.4, 5.1, -7.4) },
+    { name: "window", point: vec(-5.2, 5.2, -4.6) },
   ];
 
   // The height a walking fly stands on at (x, z): the highest ledge whose top covers the

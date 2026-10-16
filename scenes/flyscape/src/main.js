@@ -5,7 +5,7 @@ import { createEnvironment, createMotes } from "./environment.js";
 import { createFlies } from "./fly.js";
 import { createFood } from "./food.js";
 import { createBrain } from "./brain.js";
-import { randomGenerator } from "./math.js";
+import { clamp, randomGenerator } from "./math.js";
 import { createFrameLoop } from "../../shared/frame-loop.js";
 import { renderSettings, framebufferSize } from "./render-policy.js";
 
@@ -66,7 +66,7 @@ async function start() {
   renderer.info.autoReset = false;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMappingExposure = 1.12;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const scene = new THREE.Scene();
@@ -74,17 +74,17 @@ async function start() {
   // A warm haze thickens toward the back wall, so the window glows through the room
   // while the near desk keeps its contrast.
   scene.fog = new THREE.FogExp2("#1c130c", 0.022);
-  const camera = new THREE.PerspectiveCamera(26, 1420 / 740, 0.2, 70);
-  camera.position.set(0, 5.4, 13.2);
-  camera.lookAt(0, 2.1, -0.7);
+  const camera = new THREE.PerspectiveCamera(32, 1420 / 740, 0.2, 70);
+  camera.position.set(-0.3, 5.0, 13.4);
+  camera.lookAt(-0.3, 2.3, -0.9);
 
   // Dusk indoors: a dim sky and a weak bounce, plus the window's low sun as the key.
   // The lower bound of the hemisphere sits almost black so the desk falls away into
   // shadow at the frame's edges.
-  scene.add(new THREE.HemisphereLight(0x8d7c66, 0x1c130d, 0.34));
+  scene.add(new THREE.HemisphereLight(0x8d7c66, 0x1c130d, 0.46));
   const key = new THREE.DirectionalLight(0xffcf9e, 2.7);
-  key.position.set(-9, 10, -1.6);
-  key.target.position.set(3, 0, 1.4);
+  key.position.set(-7.5, 10, -1.4);
+  key.target.position.set(1.6, 0, 1.2);
   key.castShadow = true;
   key.shadow.mapSize.set(settings.shadowSize, settings.shadowSize);
   Object.assign(key.shadow.camera, {
@@ -99,10 +99,10 @@ async function start() {
   key.shadow.normalBias = 0.02;
   key.shadow.radius = 3 * settings.shadowSize / 4096;
   scene.add(key, key.target);
-  const fill = new THREE.DirectionalLight(0x5d6f85, 0.5);
+  const fill = new THREE.DirectionalLight(0x5d6f85, 0.55);
   fill.position.set(7, 5, 9);
   scene.add(fill);
-  const bounce = new THREE.DirectionalLight(0xc4a276, 0.3);
+  const bounce = new THREE.DirectionalLight(0xc4a276, 0.45);
   bounce.position.set(4, 2, 12);
   scene.add(bounce);
 
@@ -162,7 +162,13 @@ async function start() {
       ),
       camera,
     );
-    if (raycaster.ray.intersectPlane(worldPlane, dropPoint)) food.drop(dropPoint);
+    if (raycaster.ray.intersectPlane(worldPlane, dropPoint)) {
+      // Keep a click's sugar inside the room: a cube outside the walking bounds would
+      // draw flies to a spot they can never actually reach.
+      dropPoint.x = clamp(dropPoint.x, environment.bounds.minX + 0.4, environment.bounds.maxX - 0.4);
+      dropPoint.z = clamp(dropPoint.z, environment.bounds.minZ + 0.4, environment.bounds.maxZ - 0.4);
+      food.drop(dropPoint);
+    }
   });
   // The same pinch without a click, for the wallpaper's menu: the cursor is up in the
   // menu bar at that moment, so a scatter goes over the open desk instead.
