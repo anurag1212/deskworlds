@@ -7,16 +7,34 @@ landed.
 
 ## What is real, and what is not (yet)
 
-The flies are procedural, and their behaviour is scripted in the same sense the other
-worlds' fish are: a small state machine, tuned by hand. What makes this world different
-is the seam it is built around — `src/brain.js`.
+The flies are procedural, and their bodies are a hand-built state machine in the
+same sense the other worlds' fish are. What makes this world different is what
+decides: `src/connectome.js` runs a leaky integrate-and-fire simulation of the
+real FlyWire v783 reduced circuit (961 neurons, 17,952 signed synapses, Shiu et
+al. 2024 constants at 0.1 ms steps), one independent circuit per fly.
 
-Today `createBrain()` is a **scripted placeholder**: a loom pulse for a fast cursor, a
-slow arousal wave and hunger, and no connectome involved. The plan is to replace it with
-the real thing behind the same `update`/`notify` contract: a leaky integrate-and-fire
-simulation of the FlyWire (or MaleCNS) connectome driving `escape` (LC4/LPLC2 → DNp01),
-`steer` (LC10a → DNa01/DNa02) and feeding (sugar GRNs → proboscis motor neurons). The
-body, the world and the tests do not change when that happens — only `brain.js` does.
+- **Escape** fires on the LC4/LPLC2 looming-detector burst (smoothed over
+  150 ms; a fast loom bursts ~150 Hz per cell, a slow hand ~5). The reduced
+  extract cuts the recurrent loops that fire the giant fiber in the full brain
+  — GF's in-circuit in-weight sums net negative — so a GF spike also escapes
+  but the burst is the working signal. Stated, not hidden.
+- **Steering** reads DNa01/DNa02 right-minus-left through real wiring that
+  segregates perfectly (right-eye drive reaches right DNs only, and vice
+  versa), minus a calibration offset measured at the background operating
+  point. Symmetric background drive means straight walking until food biases it.
+- **Feeding** runs the Shiu headline circuit: sugar GRNs at 100 Hz drive the
+  proboscis motor neurons (4.3 Hz over a silent baseline).
+- **Restlessness** comes from the brain's own sparse background activity, not a
+  sine wave. Hunger/satiety stays a slow bodily integrator fed by `fed` events.
+
+Still modeled: the cursor-to-Poisson map, the background visual drive, the
+rate-to-behavior scales, muscle forces. `src/brain.js` keeps the scripted
+placeholder as the fallback when no pack is built (fresh clones, node tests);
+`main.js` upgrades to the connectome brain once `data/` loads.
+
+The **Brain** button (preview only, key `B`) opens the live brain window:
+23,210 somas at their real positions, the watched fly's spikes flashing where
+they fire, per-population rates, and a fly switcher.
 
 The candidates for that engine, and the reasons they were shortlisted, are recorded in
 the research notes that seeded this scene (see [awesome-fly](https://github.com/cobanov/awesome-fly)

@@ -43,6 +43,7 @@
           <button disabled id="pause" aria-pressed="false" title="Space">Pause</button>
           <button disabled id="feed">Feed</button>
           <button disabled id="fullscreen" title="F">Fullscreen</button>
+          <button disabled id="brain" aria-pressed="false" title="B">Brain</button>
         </div>
         <div class="preferences">
           <select disabled id="quality" aria-label="Quality">
@@ -54,6 +55,13 @@
         </div>
       </footer>
       <button disabled id="show-controls" title="H">Show controls</button>
+      <aside id="brain-panel" aria-label="Live fly brain" hidden>
+        <h2>fly 1 · live brain</h2>
+        <canvas width="300" height="300"></canvas>
+        <div class="brain-flies" role="group" aria-label="Watched fly"></div>
+        <div class="brain-rates" aria-live="off"></div>
+        <p>23,210 somas · spikes flash where they fire · rates are the watched fly</p>
+      </aside>
       <div id="loading" role="status"><p>Loading world…</p></div>
       <div id="error" role="alert" hidden></div>
     </main>

@@ -5,6 +5,8 @@ import { createEnvironment, createMotes } from "./environment.js";
 import { createFlies } from "./fly.js";
 import { createFood } from "./food.js";
 import { createBrain } from "./brain.js";
+import { createConnectomeBrain, loadPack } from "./connectome.js";
+import { createBrainView } from "./brainview.js";
 import { clamp, randomGenerator } from "./math.js";
 import { createFrameLoop } from "../../shared/frame-loop.js";
 import { renderSettings, framebufferSize } from "./render-policy.js";
@@ -109,7 +111,38 @@ async function start() {
   const environment = createEnvironment(scene);
   const motes = createMotes(scene);
   const food = createFood(scene, { supportHeight: environment.supportHeight });
-  const brain = createBrain({ seed: 20261016 });
+  let brain = createBrain({ seed: 20261016 });
+  let brainView = null;
+  // The connectome engine upgrades the placeholder once its pack loads. A fresh
+  // clone without generated data keeps the scripted circuit: nothing here may
+  // assume the fetch succeeds.
+  loadPack(new URL("../data", import.meta.url).href).then(
+    (pack) => {
+      brain = createConnectomeBrain(pack, { flies: flies.flies.length });
+      const panel = document.querySelector("#brain-panel");
+      const toggle = document.querySelector("#brain");
+      if (panel && toggle) {
+        brainView = createBrainView(panel, pack, brain, { flies: flies.flies.length });
+        toggle.disabled = false;
+        toggle.addEventListener("click", () => {
+          brainView.setVisible(!brainView.visible);
+          toggle.setAttribute("aria-pressed", String(brainView.visible));
+        });
+        document.addEventListener("keydown", (event) => {
+          if (event.repeat || event.target.closest("button,select,input,textarea,a,[contenteditable]")) return;
+          if (event.key.toLowerCase() === "b") {
+            brainView.setVisible(!brainView.visible);
+            toggle.setAttribute("aria-pressed", String(brainView.visible));
+          }
+        });
+        if (query.get("brain") === "1") {
+          brainView.setVisible(true);
+          toggle.setAttribute("aria-pressed", "true");
+        }
+      }
+    },
+    (error) => console.warn("flyscape: connectome pack missing, placeholder brain;", error.message),
+  );
   const flies = createFlies(scene, {
     obstacles: environment.obstacles,
     landmarks: environment.landmarks,
@@ -240,6 +273,7 @@ async function start() {
 
   let time = 0, lastShadowTime = -Infinity, renderedFrames = 0, shadowFrames = 0;
   let ready = false;
+  let lastDrives = [];
 
   // The bridge between the world and the brain seam. The seam gets one drive record per
   // fly, two feedback events (fed, landed) the way ascending neurons would, and the
@@ -263,6 +297,7 @@ async function start() {
         bodies,
       });
       flies.update(step, time, { drives, food, pointer, onEvent });
+      lastDrives = drives;
       food.update(step);
       motes.update(step);
     }
@@ -278,6 +313,11 @@ async function start() {
     renderer.info.reset();
     renderer.render(scene, camera);
     renderedFrames++;
+    if (brainView?.visible) {
+      brainView.draw(dt);
+      // Rate readouts need only follow behavior, not spikes: ten a second is plenty.
+      if (renderedFrames % 6 === 0) brainView.refreshRates(lastDrives);
+    }
     if (!ready) {
       ready = true;
       loading.style.opacity = 0;
