@@ -11,6 +11,9 @@ Deskworlds puts a small living 3D world on your Mac desktop. The creatures in ea
 | ![Riverbed](docs/images/riverscape-wide.png) **Riverbed** | ![Coral reef](docs/images/reefscape-wide.png) **Coral reef** |
 | ![Betta](docs/images/bettascape-wide.png) **Betta** | ![Plasma globe](docs/images/plasmascape-wide.png) **Plasma globe** |
 | ![Koi pond](docs/images/koiscape-wide.png) **Koi pond** | ![Bonfire](docs/images/bonfirescape-wide.png) **Bonfire** |
+| ![Fly world](docs/images/flyscape-wide.png) **Fly world** | |
+
+Fly world is new: its flies are procedural today, driven by a scripted placeholder circuit behind a brain seam built for the FlyWire connectome. See [scenes/flyscape/README.md](scenes/flyscape/README.md) for what is real and what is planned.
 
 ## Install on Mac
 
