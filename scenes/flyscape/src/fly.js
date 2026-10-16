@@ -420,7 +420,14 @@ export function createFlies(scene, {
         fly.heading +=
           angleDelta(fly.heading, Math.atan2(toTarget.x, toTarget.z)) * Math.min(1, dt * 6);
         fly.heading += drive.steer * dt * 0.5;
-        const step = Math.min(distance, WALK_SPEED * dt);
+        // The cord's motor tone sets the walking pace: a resting cord shuffles,
+        // a driven one strides. Measured tone on the real cord runs median
+        // 0.8 Hz, p90 6.4 Hz, max ~25 Hz; the curve is tuned to that range.
+        // Feet never slide: stride per unit distance is constant, only speed
+        // changes. Modeled interface; the pace comes from real motor neurons.
+        const tone = drive.legTone;
+        const pace = tone === undefined ? 1 : clamp(0.5 + tone / 8, 0.5, 1.8);
+        const step = Math.min(distance, WALK_SPEED * pace * dt);
         const nextX = clamp(position.x + Math.sin(fly.heading) * step, bounds.minX, bounds.maxX);
         const nextZ = clamp(position.z + Math.cos(fly.heading) * step, bounds.minZ, bounds.maxZ);
         const nextGround = supportHeight(nextX, nextZ);

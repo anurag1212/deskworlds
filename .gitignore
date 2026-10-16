@@ -2,8 +2,9 @@
 .claude/
 node_modules/
 /aquarium-shader-improved.zip
-# FlyWire-derived packs (CC BY-NC 4.0): each machine builds its own via
-# tools/fetch_flywire_pack.py. The data README stays committed.
+# FlyWire/MaleCNS-derived packs (CC BY-NC 4.0 / CC BY 4.0): each machine builds
+# its own via tools/fetch_*_pack.py. The data READMEs stay committed.
 scenes/flyscape/data/*.json
+scenes/flyscape/data-malecns/*.json
 /review/
 iterations/

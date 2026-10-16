@@ -32,9 +32,22 @@ rate-to-behavior scales, muscle forces. `src/brain.js` keeps the scripted
 placeholder as the fallback when no pack is built (fresh clones, node tests);
 `main.js` upgrades to the connectome brain once `data/` loads.
 
+The **cord** (optional, `data-malecns/`): each fly also runs a second LIF
+circuit over the MaleCNS v1.0 sensorimotor extract — 3,380 neurons including
+all 708 leg motor neurons in flexor/extensor/rotator pools per thoracic
+neuromere, the identified command cells, and bounded sets of descending and
+ascending cells. The brain's DNa readouts drive the cord's DNa homologues
+(lateralized by side, a modeled cross-specimen interface like DesktopFly's),
+and the cord's motor-pool rates come back as per-leg tone that sets the walking
+pace. The cord extract is deliberately tight: a first pass kept the whole
+descending highway and seized at any real drive (measured, then fixed — see
+`tools/fetch_malecns_pack.py`). The Shiu constants were fitted to FlyWire, not
+to this male specimen, and the pack records that plainly.
+
 The **Brain** button (preview only, key `B`) opens the live brain window:
-23,210 somas at their real positions, the watched fly's spikes flashing where
-they fire, per-population rates, and a fly switcher.
+the full CNS soma cloud (brain + ventral nerve cord) at real positions, the
+watched fly's spikes flashing where they fire in both circuits, per-population
+rates including cord tone, and a fly switcher.
 
 The candidates for that engine, and the reasons they were shortlisted, are recorded in
 the research notes that seeded this scene (see [awesome-fly](https://github.com/cobanov/awesome-fly)

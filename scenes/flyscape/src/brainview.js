@@ -25,6 +25,8 @@ export function createBrainView(panel, pack, brain, { flies = 4 } = {}) {
   let angle = 0;
   // Per-circuit-neuron glow, decayed every frame: index -> brightness.
   const glow = new Float32Array(pack.wiring.n);
+  const glowVnc = pack.vnc ? new Float32Array(pack.vnc.wiring.n) : null;
+  const caption = panel.querySelector("p");
   const buttons = [];
   for (let f = 0; f < flies; f++) {
     const button = document.createElement("button");
@@ -65,23 +67,32 @@ export function createBrainView(panel, pack, brain, { flies = 4 } = {}) {
       ctx.fillRect(px, py, 1.4, 1.4);
     }
     // Circuit spikes: the watched fly's recent spikes glow at their somas.
+    // Brain first, then cord (the MaleCNS pack spans both), each with its own
+    // position list and glow buffer.
     for (const s of brain.recent(watched)) glow[s] = 1;
-    const neurons = pack.neurons;
-    for (let i = 0; i < glow.length; i++) {
-      if (glow[i] <= 0.02) continue;
+    drawGlow(pack.neurons, glow, cos, sin, cx, scale, size);
+    if (glowVnc && brain.recentVnc) {
+      for (const s of brain.recentVnc(watched)) glowVnc[s] = 1;
+      drawGlow(pack.vnc.neurons, glowVnc, cos, sin, cx, scale, size);
+    }
+  }
+
+  function drawGlow(neurons, buffer, cos, sin, cx, scale, size) {
+    for (let i = 0; i < buffer.length; i++) {
+      if (buffer[i] <= 0.02) continue;
       const neuron = neurons[i];
       const [x, y, z] = neuron.pos;
       const px = cx + (x * cos - z * sin) * scale;
       const py = cx + y * scale * 0.9 - size * 0.04;
-      if (px < 0 || px > size || py < 0 || py > size) { glow[i] = 0; continue; }
+      if (px < 0 || px > size || py < 0 || py > size) { buffer[i] = 0; continue; }
       ctx.fillStyle = ROLE_COLORS[neuron.role] ?? ROLE_COLORS.other;
-      ctx.globalAlpha = clamp(glow[i], 0, 1);
+      ctx.globalAlpha = clamp(buffer[i], 0, 1);
       const r = neuron.role === "other" ? 1.6 : 2.6;
       ctx.beginPath();
       ctx.arc(px, py, r, 0, 6.2832);
       ctx.fill();
       ctx.globalAlpha = 1;
-      glow[i] *= 0.86;
+      buffer[i] *= 0.86;
     }
   }
 
@@ -93,6 +104,8 @@ export function createBrainView(panel, pack, brain, { flies = 4 } = {}) {
       ["loom burst", drive.loomHz ?? 0],
       ["steer R−L", drive.steerHz ?? 0],
       ["proboscis", drive.proboscisHz ?? 0],
+      ["cord", drive.vncHz ?? 0],
+      ["leg tone", drive.legTone ?? 0],
       ["brain", drive.popHz ?? 0],
     ];
     readout.replaceChildren(

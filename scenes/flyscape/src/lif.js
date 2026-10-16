@@ -54,26 +54,69 @@ export function createCircuit({ n, rowPtr, col, count, params = SHIU } = {}) {
   for (let i = 0; i < delayTicks; i++) ring.push([]);
   let cursor = 0;
   let tick = 0;
+  // Activity tracking: a neuron at rest (v == v0, g == 0, no refractory, no
+  // arrivals) is an exact fixed point of the update, so it is skipped until
+  // something touches it. Dense list + position map for O(1) add/remove.
+  const activeList = [];
+  const activePos = new Int32Array(n).fill(-1);
+
+  function activate(i) {
+    if (activePos[i] < 0) {
+      activePos[i] = activeList.length;
+      activeList.push(i);
+    }
+  }
+
+  function deactivateAt(k) {
+    const last = activeList.pop();
+    if (k < activeList.length) {
+      activeList[k] = last;
+      activePos[last] = k;
+    }
+    // activePos[removed] reset by caller
+  }
   const spikes = []; // reused scratch, returned by reference: copy it out
   const incoming = new Float64Array(n); // arrivals this tick, as raw counts
 
-  // One 0.1 ms tick. `drive` maps neuron index -> Poisson rate in Hz for this
-  // tick; `silenced` is a Set of indices whose outgoing edges deliver nothing.
+  // One 0.1 ms tick. `drive` is either a Float64Array of per-neuron Poisson
+  // rates in Hz, or a Map index->rate; `silenced` is a Set of indices whose
+  // outgoing edges deliver nothing; `driveList` (with an array drive) lists the
+  // nonzero entries so activation stays O(driven), not O(n).
   // Returns the shared scratch array of spiking indices (copy before keeping).
-  function step(drive = null, silenced = null) {
+  function step(drive = null, silenced = null, driveList = null) {
     spikes.length = 0;
+    const isMap = drive instanceof Map;
     const landing = ring[cursor];
     ring[cursor] = [];
     cursor = (cursor + 1) % delayTicks;
     // Deliveries accumulate as integer counts first; the millivolt factor
     // applies once below, so the sum cannot depend on arrival order.
+    // A delivery wakes its target: it now has something to integrate.
     for (let k = 0; k < landing.length; k++) {
       const [post, count] = landing[k];
-      if (refractory[post] === 0) incoming[post] += count;
+      if (refractory[post] === 0) {
+        incoming[post] += count;
+        activate(post);
+      }
+    }
+    // Driven cells are awake by definition while their rate is set.
+    if (drive) {
+      if (isMap) {
+        for (const i of drive.keys()) if (drive.get(i)) activate(i);
+      } else if (driveList) {
+        for (let k = 0; k < driveList.length; k++)
+          if (drive[driveList[k]]) activate(driveList[k]);
+      } else {
+        for (let i = 0; i < n; i++) if (drive[i]) activate(i);
+      }
     }
     const v0 = params.v0, vth = params.vth, vrst = params.vrst;
     const wsyn = params.wsyn, poissonStep = wsyn * params.fPoi;
-    for (let i = 0; i < n; i++) {
+    // Only awake neurons are stepped; the rest sit exactly at rest. The loop
+    // compacts as neurons settle, so a quiet network costs almost nothing.
+    // Newly woken neurons append during iteration and are stepped the same tick.
+    for (let k = 0; k < activeList.length; k++) {
+      const i = activeList[k];
       if (refractory[i] > 0) {
         // Shielded from every write while refractory, then released.
         // The arrival counts above were already gated; nothing else to do.
@@ -87,15 +130,15 @@ export function createCircuit({ n, rowPtr, col, count, params = SHIU } = {}) {
         gi += arrived * wsyn;
         incoming[i] = 0;
       }
-      const rate = drive ? drive.get(i) : 0;
+      const rate = drive ? (isMap ? drive.get(i) : drive[i]) : 0;
       if (rate) {
         // Poisson events add straight into voltage, as in Shiu poi().
         // Knuth sampling: exact for any rate, 1-2 RNG draws at these rates.
         const p = rate * params.dt;
-        let k = 0, prob = 1;
+        let events = 0, prob = 1;
         const limit = Math.exp(-p);
-        do { k++; prob *= rng(); } while (prob > limit);
-        vi += (k - 1) * poissonStep;
+        do { events++; prob *= rng(); } while (prob > limit);
+        vi += (events - 1) * poissonStep;
         v[i] = vi;
         g[i] = gi;
         if (vi > vth) {
@@ -113,6 +156,13 @@ export function createCircuit({ n, rowPtr, col, count, params = SHIU } = {}) {
         v[i] = vrst;
         g[i] = 0;
         refractory[i] = rfcTicks;
+        continue;
+      }
+      // Settled back to exact rest with nothing pending: sleep until touched.
+      if (vi === v0 && gi === 0) {
+        activePos[i] = -1;
+        deactivateAt(k);
+        k--;
       }
     }
     // Schedule this tick's spikes onto the ring, unless silenced.
@@ -138,6 +188,8 @@ export function createCircuit({ n, rowPtr, col, count, params = SHIU } = {}) {
     g.fill(0);
     refractory.fill(0);
     incoming.fill(0);
+    activeList.length = 0;
+    activePos.fill(-1);
     for (let i = 0; i < ring.length; i++) ring[i] = [];
     cursor = 0;
     tick = 0;
