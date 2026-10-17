@@ -53,8 +53,9 @@ LEG_SIDES = ["left", "right"]
 LEG_ROW = ["T1", "T2", "T3"]
 
 # Grid cells across a mesh's longest axis, per part class: enough to read as
-# anatomy at wallpaper size without shipping 140 MB of OBJ to a browser.
-CELLS = {"body": 64, "eye": 52, "proboscis": 44, "wing": 56, "leg": 40, "small": 26}
+# anatomy at wallpaper size without shipping 140 MB of OBJ to a browser. The
+# desk is viewed at 4K, so bodies get real resolution.
+CELLS = {"body": 88, "eye": 72, "proboscis": 56, "wing": 64, "leg": 48, "small": 32}
 TARGET_LENGTH = 0.72  # rig units, matching the procedural fly's ~0.79 span
 
 

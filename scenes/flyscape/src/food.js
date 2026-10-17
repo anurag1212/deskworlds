@@ -8,18 +8,61 @@ import { randomGenerator, vec } from "./math.js";
 // Only colour and size are decided here. Who eats what, and how fast, belongs to the fly
 // and the circuit: `consume` is the fly's bite made visible.
 
-const CUBE = 0.24;
+const CUBE = 0.22;
 const DROP_HEIGHT = 7.2;
 const LIFE = 34; // seconds on the desk before an untouched cube starts to fade
 const FADE = 4;
 
+// A sugar cube: a jittered box with a grainy face texture and a soft sheen, so
+// it reads as pressed sugar rather than a white brick.
+function sugarGeometry(seed = 0x5a17) {
+  const random = randomGenerator(seed);
+  const geometry = new THREE.BoxGeometry(CUBE, CUBE * 0.82, CUBE, 4, 4, 4);
+  const position = geometry.attributes.position;
+  for (let i = 0; i < position.count; i++) {
+    position.setXYZ(
+      i,
+      position.getX(i) + (random() - 0.5) * 0.014,
+      position.getY(i) + (random() - 0.5) * 0.012,
+      position.getZ(i) + (random() - 0.5) * 0.014,
+    );
+  }
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function sugarTexture() {
+  const random = randomGenerator(0x77aa);
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#f6f1e4";
+  ctx.fillRect(0, 0, 128, 128);
+  for (let i = 0; i < 2600; i++) {
+    const shade = 200 + Math.round(random() * 55);
+    ctx.fillStyle = `rgba(${shade},${shade - 4},${shade - 12},${0.25 + random() * 0.5})`;
+    ctx.fillRect(random() * 128, random() * 128, 1 + random() * 1.6, 1 + random() * 1.6);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
 export function createFood(scene, { supportHeight = () => 0, seed = 2207 } = {}) {
   const random = randomGenerator(seed);
-  const geometry = new THREE.BoxGeometry(CUBE, CUBE * 0.86, CUBE);
-  const material = new THREE.MeshStandardMaterial({
-    color: 0xf3edde,
-    roughness: 0.38,
-    flatShading: true,
+  const geometry = sugarGeometry();
+  const grain = typeof document !== "undefined" ? sugarTexture() : null;
+  const material = new THREE.MeshPhysicalMaterial({
+    color: grain ? 0xffffff : 0xf3edde,
+    map: grain,
+    bumpMap: grain,
+    bumpScale: 0.004,
+    roughness: 0.55,
+    clearcoat: 0.25,
+    clearcoatRoughness: 0.6,
+    sheen: 0.5,
+    sheenColor: new THREE.Color(0xffffff),
   });
   const items = [];
   let nextId = 1;

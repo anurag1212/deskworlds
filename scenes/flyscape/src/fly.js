@@ -19,7 +19,6 @@ export const FLY_COUNT = 1;
 const WALK_SPEED = 1.05;
 const FLIGHT_SPEED = 3.7;
 const FLEE_SPEED = 8.6;
-const LAND_SINK = 1.8;
 const WALK_STRIDE = 7.5; // leg phase radians per world unit walked
 const FLAP_RATE = 52; // wing phase radians per second in flight (~8 Hz, readable)
 const LEG_REACH = 0.3; // thorax height above the feet
@@ -360,7 +359,7 @@ export function createFlies(scene, {
             fly.targetFood = food;
             beginTakeoff(fly, ctx);
           }
-        } else if (drive.arousal > 0.6 && fly.random() < drive.arousal * 0.5) {
+        } else if (drive.arousal > 0.58 && fly.random() < drive.arousal * 0.5) {
           pickFlightTarget(fly, ctx, drive, false);
           beginTakeoff(fly, ctx);
         } else if (fly.random() < 0.16) {
@@ -418,11 +417,17 @@ export function createFlies(scene, {
           break;
         }
         toTarget.divideScalar(distance);
-        // A lean from the circuit bends the path slightly, the way a walking fly
-        // wanders: enough to see, never enough to derail a walk to food.
+        // Walking is stop-and-go: a short pause now and then, a slow drift of
+        // heading, and the circuit's lean on top.
+        if (fly.pauseUntil && time < fly.pauseUntil) break;
+        fly.pauseUntil = 0;
+        if (fly.random() < dt * 0.3) {
+          fly.pauseUntil = time + 0.3 + fly.random() * 0.9;
+          break;
+        }
         fly.heading +=
           angleDelta(fly.heading, Math.atan2(toTarget.x, toTarget.z)) * Math.min(1, dt * 6);
-        fly.heading += drive.steer * dt * 0.5;
+        fly.heading += drive.steer * dt * 0.5 + (fly.random() - 0.5) * dt * 0.5;
         // The cord's motor tone sets the walking pace: a resting cord shuffles,
         // a driven one strides. Measured tone on the real cord runs median
         // 0.8 Hz, p90 6.4 Hz, max ~25 Hz; the curve is tuned to that range.
@@ -455,9 +460,11 @@ export function createFlies(scene, {
           fly.mode = "fly";
           fly.modeTime = 0;
           stats.flights++;
+          fly.flapBoost = 1.2; // a burst of wingbeats as it pops off the desk
+          fly.hoverStart = null;
           fly.velocity.set(
             Math.sin(fly.heading) * FLIGHT_SPEED,
-            1.6,
+            2.3,
             Math.cos(fly.heading) * FLIGHT_SPEED,
           );
         }
@@ -467,7 +474,10 @@ export function createFlies(scene, {
       case "fly":
       case "flee": {
         const fleeing = fly.mode === "flee";
-        const maxSpeed = fleeing ? FLEE_SPEED : FLIGHT_SPEED + drive.arousal * 1.2;
+        // Wingbeats come in bursts, so speed does too: a fly crosses the desk in
+        // fast saccades with slower stretches between them.
+        const saccade = fleeing ? 1 : 0.78 + 0.5 * Math.abs(Math.sin(time * 0.85 + fly.bobPhase));
+        const maxSpeed = fleeing ? FLEE_SPEED : (FLIGHT_SPEED + drive.arousal * 1.2) * saccade;
         fly.timer -= dt;
 
         if (!fleeing) {
@@ -476,6 +486,8 @@ export function createFlies(scene, {
           if (distance < 0.72) {
             fly.mode = "land";
             fly.modeTime = 0;
+            fly.hoverStart = null;
+            fly.sinkSpeed = 0;
             fly.target.set(
               fly.target.x,
               supportHeight(fly.target.x, fly.target.z) + 0.004,
@@ -483,8 +495,32 @@ export function createFlies(scene, {
             );
             break;
           }
+          // A hover before the landfall: close in, then hang for a beat.
+          if (distance < 1.5) {
+            if (fly.hoverStart == null) fly.hoverStart = time;
+            else if (time - fly.hoverStart > 0.3 + fly.random() * 0.5) {
+              fly.mode = "land";
+              fly.modeTime = 0;
+              fly.hoverStart = null;
+              fly.sinkSpeed = 0;
+              fly.target.set(
+                fly.target.x,
+                supportHeight(fly.target.x, fly.target.z) + 0.004,
+                fly.target.z,
+              );
+              break;
+            }
+            delta.divideScalar(distance);
+            steer.copy(delta).multiplyScalar(maxSpeed * 0.25);
+            steer.y += Math.sin(time * 7 + fly.bobPhase) * 0.5;
+            break;
+          }
+          fly.hoverStart = null;
           delta.divideScalar(distance);
           steer.copy(delta).multiplyScalar(maxSpeed);
+          // A slow drift of heading between saccades.
+          steer.x += Math.sin(time * 2.3 + fly.bobPhase) * 0.35;
+          steer.z += Math.cos(time * 1.7 + fly.bobPhase * 1.3) * 0.35;
         } else {
           if (fly.timer <= 0) {
             // The landfall after a scare: head for whatever ledge is nearest in front.
@@ -539,7 +575,12 @@ export function createFlies(scene, {
       }
 
       case "land": {
-        position.y = Math.max(fly.target.y, position.y - LAND_SINK * dt);
+        // Gravity does most of the descent; the last stretch flattens into a
+        // flare instead of a constant-rate sink.
+        fly.sinkSpeed = (fly.sinkSpeed ?? 0) + 8.5 * dt;
+        const remaining = position.y - fly.target.y;
+        if (remaining < 0.3) fly.sinkSpeed = Math.min(fly.sinkSpeed, 0.4 + remaining);
+        position.y = Math.max(fly.target.y, position.y - Math.min(fly.sinkSpeed, 3.2) * dt);
         delta.copy(fly.target).sub(position);
         delta.y = 0;
         const distance = delta.length();
@@ -617,7 +658,8 @@ export function createFlies(scene, {
     // clock, so a resting fly's wings only breathe and a paused world holds still.
     const airborne = fly.mode === "fly" || fly.mode === "flee" || fly.mode === "land";
     const flying = fly.mode === "fly" || fly.mode === "flee";
-    fly.wingPhase = (fly.wingPhase + dt * (flying ? FLAP_RATE : 6)) % TAU;
+    fly.wingPhase = (fly.wingPhase + dt * (flying ? FLAP_RATE * (1 + (fly.flapBoost ?? 0)) : 6)) % TAU;
+    fly.flapBoost = Math.max(0, (fly.flapBoost ?? 0) - dt * 1.6);
     const breathe = Math.sin(fly.wingPhase) * 0.03;
     for (const wing of fly.parts.wings) {
       wing.fold = damp(wing.fold, airborne ? 0 : 1, 12, dt);
@@ -661,8 +703,10 @@ export function createFlies(scene, {
       fly.bobPhase += dt * 18;
       fly.parts.body.position.y = fly.reach + Math.sin(fly.bobPhase) * 0.02;
     } else {
+      // On foot the body rolls gently with the stride; in flight it banks.
+      const roll = fly.mode === "walk" ? Math.sin(fly.legPhase * 0.5) * 0.06 : 0;
       fly.parts.body.rotation.x = damp(fly.parts.body.rotation.x, 0, 10, dt);
-      fly.parts.body.rotation.z = damp(fly.parts.body.rotation.z, 0, 10, dt);
+      fly.parts.body.rotation.z = damp(fly.parts.body.rotation.z, roll, 10, dt);
       fly.bobPhase = 0;
       if (fly.mode === "takeoff") {
         // The crouch owns the body height until the wings take over.

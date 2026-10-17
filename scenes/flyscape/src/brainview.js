@@ -43,7 +43,7 @@ const MODE_WORDS = {
 
 export function createBrainView(hud, pack, brain, { flock } = {}) {
   const flies = flock?.flies ?? [];
-  const labels = flies.length > 1;
+  const labels = flies.length <= 2;
   const cards = flies.map((fly) => {
     const card = document.createElement("div");
     card.className = "brain-card";
@@ -78,15 +78,6 @@ export function createBrainView(hud, pack, brain, { flock } = {}) {
     };
   });
   let visible = false;
-
-  function resize() {
-    for (const card of cards) {
-      const bounds = card.getBoundingClientRect();
-      const size = Math.max(120, Math.round(Math.min(bounds.height, 150) * 1.4));
-      card.cloud.width = size;
-      card.cloud.height = size;
-    }
-  }
 
   function drawGlow(ctx, neurons, buffer, cos, sin, cx, scale, size, step) {
     for (let i = 0; i < buffer.length; i += step) {
@@ -143,6 +134,9 @@ export function createBrainView(hud, pack, brain, { flock } = {}) {
     ctx.drawImage(card.raster, -2, 0);
     ctx.globalCompositeOperation = "source-over";
     const index = card.fly.id;
+    // At most four spikes per row per frame: a dense population reads as a
+    // dotted band instead of a solid block of colour.
+    const budget = new Map();
     const plot = (role, vnc) => {
       for (let r = 0; r < rows; r++) {
         const spec = RASTER_ROWS[r];
@@ -150,6 +144,9 @@ export function createBrainView(hud, pack, brain, { flock } = {}) {
           ? spec.roles[role]
           : (vnc && role.startsWith("mn_") ? "#8ce08c" : null);
         if (!colour) continue;
+        const used = budget.get(r) ?? 0;
+        if (used >= 4) return;
+        budget.set(r, used + 1);
         ctx.fillStyle = colour;
         ctx.fillRect(w - 2, r * rowH + 1, 2, rowH - 2);
         return;
@@ -211,7 +208,6 @@ export function createBrainView(hud, pack, brain, { flock } = {}) {
   function setVisible(value) {
     visible = value;
     hud.hidden = !value;
-    if (value) resize();
   }
 
   return { draw, refreshRates, setVisible, get visible() { return visible; } };

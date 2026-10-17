@@ -18,6 +18,15 @@ export function createComposite(camera, settings) {
           occlusion+=smoothstep(.008,.09,difference)*(1.-smoothstep(.15,.7,difference));
         }
         color*=1.-occlusion*${(0.024 * 12 / settings.aoSamples).toFixed(8)};
+        // A soft bloom on the brightest things (the window, highlights): eight
+        // ring taps, thresholded, added back at low weight.
+        vec3 bloom=vec3(0.0);
+        for(int i=0;i<8;i++) {
+          float a=float(i)*0.785398;
+          vec2 o=vec2(cos(a),sin(a))*6.0*aoRadiusScale/size;
+          bloom+=max(texture2D(beauty,vUv+o).rgb-vec3(0.72),vec3(0.0));
+        }
+        color+=bloom*0.055;
         // Warm vignette: the room falls off into candle-light at the edges.
         vec2 v=(vUv-.5)*vec2(1.,.85);
         float vignette=dot(v,v);

@@ -15,47 +15,42 @@ const COLOURS = {
   ocelli: 0x6a5a48, brown: 0x5f4330, membrane: 0xdfe8ea,
 };
 
-// Chitin: a clear coat over a warm body, glossy eyes, wings that are mostly
-// air with a blue sheen and veins you can see through.
+// Chitin: a warm diffuse body with a soft sheen, glossy eyes, and wings that
+// read as wings: translucent but with visible veins and a blue edge.
 function materialFor(name) {
   if (name.includes("_membrane")) {
     return new THREE.MeshPhysicalMaterial({
       color: COLOURS.membrane,
-      roughness: 0.16,
+      roughness: 0.3,
       metalness: 0,
       transparent: true,
-      opacity: 0.3,
+      opacity: 0.38,
       side: THREE.DoubleSide,
       depthWrite: false,
-      sheen: 1.0,
+      sheen: 0.8,
       sheenColor: new THREE.Color(0x9fc4e8),
-      sheenRoughness: 0.5,
-      clearcoat: 0.4,
-      clearcoatRoughness: 0.3,
+      sheenRoughness: 0.6,
     });
   }
   if (name.includes("_red")) {
     return new THREE.MeshPhysicalMaterial({
-      color: COLOURS.eye, roughness: 0.12, metalness: 0.05,
-      clearcoat: 1.0, clearcoatRoughness: 0.08,
+      color: COLOURS.eye, roughness: 0.14, metalness: 0.05,
+      clearcoat: 1.0, clearcoatRoughness: 0.1,
     });
   }
   if (name.includes("_ocelli"))
-    return new THREE.MeshStandardMaterial({ color: COLOURS.ocelli, roughness: 0.35 });
-  if (name.includes("_black")) {
-    return new THREE.MeshPhysicalMaterial({
-      color: COLOURS.black, roughness: 0.32, clearcoat: 0.5, clearcoatRoughness: 0.3,
-    });
-  }
+    return new THREE.MeshStandardMaterial({ color: COLOURS.ocelli, roughness: 0.45 });
+  if (name.includes("_black"))
+    return new THREE.MeshStandardMaterial({ color: COLOURS.black, roughness: 0.5 });
   if (name.includes("_brown"))
-    return new THREE.MeshStandardMaterial({ color: COLOURS.brown, roughness: 0.5 });
+    return new THREE.MeshStandardMaterial({ color: 0x4a3322, roughness: 0.55 });
   if (name.includes("_lower")) {
     return new THREE.MeshPhysicalMaterial({
-      color: COLOURS.shellDark, roughness: 0.42, clearcoat: 0.5, clearcoatRoughness: 0.4,
+      color: COLOURS.shellDark, roughness: 0.52, clearcoat: 0.25, clearcoatRoughness: 0.5,
     });
   }
   return new THREE.MeshPhysicalMaterial({
-    color: COLOURS.shell, roughness: 0.38, clearcoat: 0.65, clearcoatRoughness: 0.32,
+    color: COLOURS.shell, roughness: 0.5, clearcoat: 0.3, clearcoatRoughness: 0.45,
   });
 }
 
@@ -138,10 +133,11 @@ export function createFlybodyRigFactory(pack) {
         mesh: membrane,
         side: wing.side,
         // The MJCF zero pose spreads the wings for flight; walking folds them
-        // back over the abdomen, which is this sweep at fold = 1.
-        rest: { sweep: 1.15, lift: 0 },
+        // back over the abdomen (sweep) and lifts them just clear of it (lift),
+        // which is why the fold lifts with the side's sign.
+        rest: { sweep: 1.15, lift: wing.side * 0.14 },
         fold: 1,
-        opacityBase: 0.3,
+        opacityBase: 0.38,
       };
     });
 

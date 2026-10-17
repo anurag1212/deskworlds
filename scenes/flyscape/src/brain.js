@@ -85,7 +85,7 @@ export function createBrain({ seed = 20261016 } = {}) {
       state.hunger = Math.min(1, state.hunger + dt * HUNGER_RATE);
       const wave = 0.5 + 0.5 * Math.sin(time * TAU * state.frequency + state.phase);
       let arousal =
-        0.14 + wave * 0.3 + state.hunger * 0.22 + state.activity * 0.3;
+        0.14 + wave * 0.3 + state.hunger * 0.26 + state.activity * 0.3;
       state.activity = Math.max(0, state.activity - dt * 0.05);
 
       // The loom: an object coming at a fly fast does not have to be close to matter.

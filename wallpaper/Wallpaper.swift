@@ -82,9 +82,16 @@ final class SceneHandler: NSObject, WKURLSchemeHandler {
       return
     }
     let type = Self.types[file.pathExtension.lowercased()] ?? "application/octet-stream"
+    // HTTPURLResponse, not URLResponse: a bare URLResponse carries no status
+    // code, and WebKit's fetch() then reports ok == false, which made every
+    // pack fetch fall back to the procedural placeholders.
     task.didReceive(
-      URLResponse(
-        url: url, mimeType: type, expectedContentLength: data.count, textEncodingName: nil))
+      HTTPURLResponse(
+        url: url, statusCode: 200, httpVersion: "HTTP/1.1",
+        headerFields: [
+          "Content-Type": type,
+          "Content-Length": String(data.count),
+        ])!)
     task.didReceive(data)
     task.didFinish()
   }

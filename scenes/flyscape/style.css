@@ -1,15 +1,17 @@
 @import url("../../ui/scene.css");
 #stage { height: 100dvh; }
 
-/* The brain HUD: a bottom instrument bar, one card per fly, always on. */
+/* The brain HUD: a top-right instrument stack, one card per fly, always on. */
 #brain-hud {
   position: absolute;
-  left: 50%;
-  bottom: 0.9rem;
-  transform: translateX(-50%);
+  top: 3.1rem;
+  right: 0.8rem;
   display: flex;
+  flex-direction: column;
   gap: 0.6rem;
-  max-width: min(1180px, calc(100vw - 2rem));
+  width: min(23rem, 34vw);
+  max-height: calc(100dvh - 8rem);
+  overflow: hidden;
   padding: 0.55rem;
   border-radius: 0.7rem;
   background: rgba(9, 12, 17, 0.72);
@@ -22,12 +24,12 @@
 #brain-hud[hidden] { display: none; }
 .brain-card {
   display: flex;
-  gap: 0.55rem;
-  align-items: stretch;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 .brain-card canvas.brain-cloud {
-  width: 132px;
-  height: 132px;
+  width: 100%;
+  aspect-ratio: 1;
   border-radius: 0.45rem;
   background: #0a0d12;
 }
@@ -35,9 +37,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-  min-width: 240px;
-  max-width: 340px;
-  flex: 1;
 }
 .brain-card-title {
   font-size: 0.72rem;
@@ -49,8 +48,7 @@
 canvas.brain-raster {
   display: block;
   width: 100%;
-  flex: 1;
-  min-height: 62px;
+  height: 84px;
   border-radius: 0.35rem;
   background: #0a0d12;
 }

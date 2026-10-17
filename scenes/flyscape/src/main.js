@@ -80,9 +80,9 @@ async function start() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.autoUpdate = false;
   renderer.info.autoReset = false;
-  renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.12;
+  renderer.toneMappingExposure = 1.18;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const scene = new THREE.Scene();
@@ -93,6 +93,15 @@ async function start() {
   const camera = new THREE.PerspectiveCamera(32, 1420 / 740, 0.2, 70);
   camera.position.set(-0.3, 5.0, 13.4);
   camera.lookAt(-0.3, 2.3, -0.9);
+  // A close-up rig for tuning the fly and props: ?zoom=1 rides the camera
+  // behind the fly so screenshots can judge detail at fly scale.
+  const zoomMode = query.get("zoom") === "1";
+  if (zoomMode) {
+    camera.position.set(0.6, 1.15, 3.4);
+    camera.lookAt(0.6, 0.35, 0.4);
+    camera.fov = 30;
+    camera.updateProjectionMatrix();
+  }
 
   // Dusk indoors: a dim sky and a weak bounce, plus the window's low sun as the key.
   // The lower bound of the hemisphere sits almost black so the desk falls away into
@@ -347,6 +356,13 @@ async function start() {
     }
     if (pointer && now - lastPointerTime > 60)
       pointer.velocity.multiplyScalar(Math.exp(-dt * 12));
+    // The tuning camera rides the fly: close enough to judge chitin, wings and
+    // leg motion, always keeping it in frame.
+    if (zoomMode) {
+      const fly = flies.flies[0].group.position;
+      camera.position.set(fly.x + 1.3, fly.y + 0.75, fly.z + 1.9);
+      camera.lookAt(fly.x, fly.y + 0.05, fly.z);
+    }
     const refreshShadow = forceShadows || time - lastShadowTime + 1e-7 >= 1 / settings.shadowHz;
     renderer.shadowMap.needsUpdate = refreshShadow;
     if (refreshShadow) {
