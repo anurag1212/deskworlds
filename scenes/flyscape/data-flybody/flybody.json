@@ -1,0 +1,1677 @@
+{
+ "version": 1,
+ "source": "TuragaLab/flybody fruitfly assets (Apache-2.0), decimated",
+ "scale": 2.38930090661562,
+ "reach": 0.315630049159503,
+ "parts": {
+  "abdomen_1_body": {
+   "pos": [
+    0,
+    6672
+   ],
+   "nrm": [
+    6672,
+    1668
+   ],
+   "idx": [
+    8340,
+    6336
+   ],
+   "verts": 556,
+   "tris": 1056,
+   "dtype": "u16"
+  },
+  "abdomen_1_lower": {
+   "pos": [
+    14676,
+    2592
+   ],
+   "nrm": [
+    17268,
+    648
+   ],
+   "idx": [
+    17916,
+    2216
+   ],
+   "verts": 216,
+   "tris": 369,
+   "dtype": "u16"
+  },
+  "abdomen_2_body": {
+   "pos": [
+    20132,
+    3912
+   ],
+   "nrm": [
+    24044,
+    980
+   ],
+   "idx": [
+    25024,
+    3548
+   ],
+   "verts": 326,
+   "tris": 591,
+   "dtype": "u16"
+  },
+  "abdomen_2_lower": {
+   "pos": [
+    28572,
+    3084
+   ],
+   "nrm": [
+    31656,
+    772
+   ],
+   "idx": [
+    32428,
+    2700
+   ],
+   "verts": 257,
+   "tris": 450,
+   "dtype": "u16"
+  },
+  "abdomen_3_body": {
+   "pos": [
+    35128,
+    4524
+   ],
+   "nrm": [
+    39652,
+    1132
+   ],
+   "idx": [
+    40784,
+    4152
+   ],
+   "verts": 377,
+   "tris": 692,
+   "dtype": "u16"
+  },
+  "abdomen_3_lower": {
+   "pos": [
+    44936,
+    3564
+   ],
+   "nrm": [
+    48500,
+    892
+   ],
+   "idx": [
+    49392,
+    3168
+   ],
+   "verts": 297,
+   "tris": 528,
+   "dtype": "u16"
+  },
+  "abdomen_4_body": {
+   "pos": [
+    52560,
+    4596
+   ],
+   "nrm": [
+    57156,
+    1152
+   ],
+   "idx": [
+    58308,
+    4208
+   ],
+   "verts": 383,
+   "tris": 701,
+   "dtype": "u16"
+  },
+  "abdomen_4_lower": {
+   "pos": [
+    62516,
+    3564
+   ],
+   "nrm": [
+    66080,
+    892
+   ],
+   "idx": [
+    66972,
+    3164
+   ],
+   "verts": 297,
+   "tris": 527,
+   "dtype": "u16"
+  },
+  "abdomen_5_body": {
+   "pos": [
+    70136,
+    4668
+   ],
+   "nrm": [
+    74804,
+    1168
+   ],
+   "idx": [
+    75972,
+    4256
+   ],
+   "verts": 389,
+   "tris": 709,
+   "dtype": "u16"
+  },
+  "abdomen_5_lower": {
+   "pos": [
+    80228,
+    3708
+   ],
+   "nrm": [
+    83936,
+    928
+   ],
+   "idx": [
+    84864,
+    3300
+   ],
+   "verts": 309,
+   "tris": 550,
+   "dtype": "u16"
+  },
+  "abdomen_6_body": {
+   "pos": [
+    88164,
+    4692
+   ],
+   "nrm": [
+    92856,
+    1176
+   ],
+   "idx": [
+    94032,
+    4280
+   ],
+   "verts": 391,
+   "tris": 713,
+   "dtype": "u16"
+  },
+  "abdomen_6_lower": {
+   "pos": [
+    98312,
+    3552
+   ],
+   "nrm": [
+    101864,
+    888
+   ],
+   "idx": [
+    102752,
+    3140
+   ],
+   "verts": 296,
+   "tris": 523,
+   "dtype": "u16"
+  },
+  "abdomen_7_body": {
+   "pos": [
+    105892,
+    4776
+   ],
+   "nrm": [
+    110668,
+    1196
+   ],
+   "idx": [
+    111864,
+    4380
+   ],
+   "verts": 398,
+   "tris": 730,
+   "dtype": "u16"
+  },
+  "abdomen_7_lower": {
+   "pos": [
+    116244,
+    3852
+   ],
+   "nrm": [
+    120096,
+    964
+   ],
+   "idx": [
+    121060,
+    3440
+   ],
+   "verts": 321,
+   "tris": 573,
+   "dtype": "u16"
+  },
+  "abdomen_8_body": {
+   "pos": [
+    124500,
+    9900
+   ],
+   "nrm": [
+    134400,
+    2476
+   ],
+   "idx": [
+    136876,
+    9876
+   ],
+   "verts": 825,
+   "tris": 1646,
+   "dtype": "u16"
+  },
+  "antenna_left_black": {
+   "pos": [
+    146752,
+    2460
+   ],
+   "nrm": [
+    149212,
+    616
+   ],
+   "idx": [
+    149828,
+    2112
+   ],
+   "verts": 205,
+   "tris": 352,
+   "dtype": "u16"
+  },
+  "antenna_left_body": {
+   "pos": [
+    151940,
+    4464
+   ],
+   "nrm": [
+    156404,
+    1116
+   ],
+   "idx": [
+    157520,
+    3936
+   ],
+   "verts": 372,
+   "tris": 656,
+   "dtype": "u16"
+  },
+  "antenna_right_black": {
+   "pos": [
+    161456,
+    2460
+   ],
+   "nrm": [
+    163916,
+    616
+   ],
+   "idx": [
+    164532,
+    2120
+   ],
+   "verts": 205,
+   "tris": 353,
+   "dtype": "u16"
+  },
+  "antenna_right_body": {
+   "pos": [
+    166652,
+    4464
+   ],
+   "nrm": [
+    171116,
+    1116
+   ],
+   "idx": [
+    172232,
+    3948
+   ],
+   "verts": 372,
+   "tris": 658,
+   "dtype": "u16"
+  },
+  "coxa_T1_left_body": {
+   "pos": [
+    176180,
+    9360
+   ],
+   "nrm": [
+    185540,
+    2340
+   ],
+   "idx": [
+    187880,
+    9440
+   ],
+   "verts": 780,
+   "tris": 1573,
+   "dtype": "u16"
+  },
+  "coxa_T1_right_body": {
+   "pos": [
+    197320,
+    9636
+   ],
+   "nrm": [
+    206956,
+    2412
+   ],
+   "idx": [
+    209368,
+    9708
+   ],
+   "verts": 803,
+   "tris": 1618,
+   "dtype": "u16"
+  },
+  "coxa_T2_left_body": {
+   "pos": [
+    219076,
+    11640
+   ],
+   "nrm": [
+    230716,
+    2912
+   ],
+   "idx": [
+    233628,
+    11700
+   ],
+   "verts": 970,
+   "tris": 1950,
+   "dtype": "u16"
+  },
+  "coxa_T2_right_body": {
+   "pos": [
+    245328,
+    11616
+   ],
+   "nrm": [
+    256944,
+    2904
+   ],
+   "idx": [
+    259848,
+    11672
+   ],
+   "verts": 968,
+   "tris": 1945,
+   "dtype": "u16"
+  },
+  "coxa_T3_left_body": {
+   "pos": [
+    271520,
+    9576
+   ],
+   "nrm": [
+    281096,
+    2396
+   ],
+   "idx": [
+    283492,
+    9600
+   ],
+   "verts": 798,
+   "tris": 1600,
+   "dtype": "u16"
+  },
+  "coxa_T3_right_body": {
+   "pos": [
+    293092,
+    9672
+   ],
+   "nrm": [
+    302764,
+    2420
+   ],
+   "idx": [
+    305184,
+    9684
+   ],
+   "verts": 806,
+   "tris": 1614,
+   "dtype": "u16"
+  },
+  "femur_T1_left_body": {
+   "pos": [
+    314868,
+    6360
+   ],
+   "nrm": [
+    321228,
+    1592
+   ],
+   "idx": [
+    322820,
+    6452
+   ],
+   "verts": 530,
+   "tris": 1075,
+   "dtype": "u16"
+  },
+  "femur_T1_right_body": {
+   "pos": [
+    329272,
+    6504
+   ],
+   "nrm": [
+    335776,
+    1628
+   ],
+   "idx": [
+    337404,
+    6560
+   ],
+   "verts": 542,
+   "tris": 1093,
+   "dtype": "u16"
+  },
+  "femur_T2_left_body": {
+   "pos": [
+    343964,
+    5772
+   ],
+   "nrm": [
+    349736,
+    1444
+   ],
+   "idx": [
+    351180,
+    5852
+   ],
+   "verts": 481,
+   "tris": 975,
+   "dtype": "u16"
+  },
+  "femur_T2_right_body": {
+   "pos": [
+    357032,
+    5928
+   ],
+   "nrm": [
+    362960,
+    1484
+   ],
+   "idx": [
+    364444,
+    5984
+   ],
+   "verts": 494,
+   "tris": 997,
+   "dtype": "u16"
+  },
+  "femur_T3_left_body": {
+   "pos": [
+    370428,
+    8640
+   ],
+   "nrm": [
+    379068,
+    2160
+   ],
+   "idx": [
+    381228,
+    8672
+   ],
+   "verts": 720,
+   "tris": 1445,
+   "dtype": "u16"
+  },
+  "femur_T3_right_body": {
+   "pos": [
+    389900,
+    8508
+   ],
+   "nrm": [
+    398408,
+    2128
+   ],
+   "idx": [
+    400536,
+    8576
+   ],
+   "verts": 709,
+   "tris": 1429,
+   "dtype": "u16"
+  },
+  "haltere_left_body": {
+   "pos": [
+    409112,
+    5340
+   ],
+   "nrm": [
+    414452,
+    1336
+   ],
+   "idx": [
+    415788,
+    5340
+   ],
+   "verts": 445,
+   "tris": 890,
+   "dtype": "u16"
+  },
+  "haltere_right_body": {
+   "pos": [
+    421128,
+    5244
+   ],
+   "nrm": [
+    426372,
+    1312
+   ],
+   "idx": [
+    427684,
+    5292
+   ],
+   "verts": 437,
+   "tris": 882,
+   "dtype": "u16"
+  },
+  "haustellum_body": {
+   "pos": [
+    432976,
+    14652
+   ],
+   "nrm": [
+    447628,
+    3664
+   ],
+   "idx": [
+    451292,
+    14700
+   ],
+   "verts": 1221,
+   "tris": 2450,
+   "dtype": "u16"
+  },
+  "head_black": {
+   "pos": [
+    465992,
+    10176
+   ],
+   "nrm": [
+    476168,
+    2544
+   ],
+   "idx": [
+    478712,
+    4796
+   ],
+   "verts": 848,
+   "tris": 799,
+   "dtype": "u16"
+  },
+  "head_body": {
+   "pos": [
+    483508,
+    40896
+   ],
+   "nrm": [
+    524404,
+    10224
+   ],
+   "idx": [
+    534628,
+    41124
+   ],
+   "verts": 3408,
+   "tris": 6854,
+   "dtype": "u16"
+  },
+  "head_ocelli": {
+   "pos": [
+    575752,
+    27864
+   ],
+   "nrm": [
+    603616,
+    6968
+   ],
+   "idx": [
+    610584,
+    27884
+   ],
+   "verts": 2322,
+   "tris": 4647,
+   "dtype": "u16"
+  },
+  "head_red": {
+   "pos": [
+    638468,
+    18516
+   ],
+   "nrm": [
+    656984,
+    4632
+   ],
+   "idx": [
+    661616,
+    17924
+   ],
+   "verts": 1543,
+   "tris": 2987,
+   "dtype": "u16"
+  },
+  "labrum_left_lower": {
+   "pos": [
+    679540,
+    5436
+   ],
+   "nrm": [
+    684976,
+    1360
+   ],
+   "idx": [
+    686336,
+    5412
+   ],
+   "verts": 453,
+   "tris": 902,
+   "dtype": "u16"
+  },
+  "labrum_right_lower": {
+   "pos": [
+    691748,
+    5412
+   ],
+   "nrm": [
+    697160,
+    1356
+   ],
+   "idx": [
+    698516,
+    5388
+   ],
+   "verts": 451,
+   "tris": 898,
+   "dtype": "u16"
+  },
+  "rostrum_body": {
+   "pos": [
+    703904,
+    15312
+   ],
+   "nrm": [
+    719216,
+    3828
+   ],
+   "idx": [
+    723044,
+    15344
+   ],
+   "verts": 1276,
+   "tris": 2557,
+   "dtype": "u16"
+  },
+  "tarsal_claw_T1_left_brown": {
+   "pos": [
+    738388,
+    5916
+   ],
+   "nrm": [
+    744304,
+    1480
+   ],
+   "idx": [
+    745784,
+    5888
+   ],
+   "verts": 493,
+   "tris": 981,
+   "dtype": "u16"
+  },
+  "tarsal_claw_T1_right_brown": {
+   "pos": [
+    751672,
+    5652
+   ],
+   "nrm": [
+    757324,
+    1416
+   ],
+   "idx": [
+    758740,
+    5636
+   ],
+   "verts": 471,
+   "tris": 939,
+   "dtype": "u16"
+  },
+  "tarsal_claw_T2_left_brown": {
+   "pos": [
+    764376,
+    6420
+   ],
+   "nrm": [
+    770796,
+    1608
+   ],
+   "idx": [
+    772404,
+    6404
+   ],
+   "verts": 535,
+   "tris": 1067,
+   "dtype": "u16"
+  },
+  "tarsal_claw_T2_right_brown": {
+   "pos": [
+    778808,
+    6432
+   ],
+   "nrm": [
+    785240,
+    1608
+   ],
+   "idx": [
+    786848,
+    6420
+   ],
+   "verts": 536,
+   "tris": 1070,
+   "dtype": "u16"
+  },
+  "tarsal_claw_T3_left_brown": {
+   "pos": [
+    793268,
+    7116
+   ],
+   "nrm": [
+    800384,
+    1780
+   ],
+   "idx": [
+    802164,
+    7088
+   ],
+   "verts": 593,
+   "tris": 1181,
+   "dtype": "u16"
+  },
+  "tarsal_claw_T3_right_brown": {
+   "pos": [
+    809252,
+    7116
+   ],
+   "nrm": [
+    816368,
+    1780
+   ],
+   "idx": [
+    818148,
+    7100
+   ],
+   "verts": 593,
+   "tris": 1183,
+   "dtype": "u16"
+  },
+  "tarsus_T1_1_left_body": {
+   "pos": [
+    825248,
+    3240
+   ],
+   "nrm": [
+    828488,
+    812
+   ],
+   "idx": [
+    829300,
+    3168
+   ],
+   "verts": 270,
+   "tris": 528,
+   "dtype": "u16"
+  },
+  "tarsus_T1_1_right_body": {
+   "pos": [
+    832468,
+    3228
+   ],
+   "nrm": [
+    835696,
+    808
+   ],
+   "idx": [
+    836504,
+    3132
+   ],
+   "verts": 269,
+   "tris": 522,
+   "dtype": "u16"
+  },
+  "tarsus_T1_2_left_body": {
+   "pos": [
+    839636,
+    3264
+   ],
+   "nrm": [
+    842900,
+    816
+   ],
+   "idx": [
+    843716,
+    3192
+   ],
+   "verts": 272,
+   "tris": 532,
+   "dtype": "u16"
+  },
+  "tarsus_T1_2_right_body": {
+   "pos": [
+    846908,
+    3168
+   ],
+   "nrm": [
+    850076,
+    792
+   ],
+   "idx": [
+    850868,
+    3080
+   ],
+   "verts": 264,
+   "tris": 513,
+   "dtype": "u16"
+  },
+  "tarsus_T1_3_left_body": {
+   "pos": [
+    853948,
+    3372
+   ],
+   "nrm": [
+    857320,
+    844
+   ],
+   "idx": [
+    858164,
+    3308
+   ],
+   "verts": 281,
+   "tris": 551,
+   "dtype": "u16"
+  },
+  "tarsus_T1_3_right_body": {
+   "pos": [
+    861472,
+    3252
+   ],
+   "nrm": [
+    864724,
+    816
+   ],
+   "idx": [
+    865540,
+    3192
+   ],
+   "verts": 271,
+   "tris": 532,
+   "dtype": "u16"
+  },
+  "tarsus_T1_4_left_body": {
+   "pos": [
+    868732,
+    3348
+   ],
+   "nrm": [
+    872080,
+    840
+   ],
+   "idx": [
+    872920,
+    3264
+   ],
+   "verts": 279,
+   "tris": 544,
+   "dtype": "u16"
+  },
+  "tarsus_T1_4_right_body": {
+   "pos": [
+    876184,
+    3408
+   ],
+   "nrm": [
+    879592,
+    852
+   ],
+   "idx": [
+    880444,
+    3336
+   ],
+   "verts": 284,
+   "tris": 556,
+   "dtype": "u16"
+  },
+  "tarsus_T2_1_left_body": {
+   "pos": [
+    883780,
+    3660
+   ],
+   "nrm": [
+    887440,
+    916
+   ],
+   "idx": [
+    888356,
+    3596
+   ],
+   "verts": 305,
+   "tris": 599,
+   "dtype": "u16"
+  },
+  "tarsus_T2_1_right_body": {
+   "pos": [
+    891952,
+    3612
+   ],
+   "nrm": [
+    895564,
+    904
+   ],
+   "idx": [
+    896468,
+    3548
+   ],
+   "verts": 301,
+   "tris": 591,
+   "dtype": "u16"
+  },
+  "tarsus_T2_2_left_body": {
+   "pos": [
+    900016,
+    3444
+   ],
+   "nrm": [
+    903460,
+    864
+   ],
+   "idx": [
+    904324,
+    3380
+   ],
+   "verts": 287,
+   "tris": 563,
+   "dtype": "u16"
+  },
+  "tarsus_T2_2_right_body": {
+   "pos": [
+    907704,
+    3432
+   ],
+   "nrm": [
+    911136,
+    860
+   ],
+   "idx": [
+    911996,
+    3380
+   ],
+   "verts": 286,
+   "tris": 563,
+   "dtype": "u16"
+  },
+  "tarsus_T2_3_left_body": {
+   "pos": [
+    915376,
+    3912
+   ],
+   "nrm": [
+    919288,
+    980
+   ],
+   "idx": [
+    920268,
+    3816
+   ],
+   "verts": 326,
+   "tris": 636,
+   "dtype": "u16"
+  },
+  "tarsus_T2_3_right_body": {
+   "pos": [
+    924084,
+    3924
+   ],
+   "nrm": [
+    928008,
+    984
+   ],
+   "idx": [
+    928992,
+    3816
+   ],
+   "verts": 327,
+   "tris": 636,
+   "dtype": "u16"
+  },
+  "tarsus_T2_4_left_body": {
+   "pos": [
+    932808,
+    3540
+   ],
+   "nrm": [
+    936348,
+    888
+   ],
+   "idx": [
+    937236,
+    3452
+   ],
+   "verts": 295,
+   "tris": 575,
+   "dtype": "u16"
+  },
+  "tarsus_T2_4_right_body": {
+   "pos": [
+    940688,
+    3480
+   ],
+   "nrm": [
+    944168,
+    872
+   ],
+   "idx": [
+    945040,
+    3396
+   ],
+   "verts": 290,
+   "tris": 566,
+   "dtype": "u16"
+  },
+  "tarsus_T3_1_left_body": {
+   "pos": [
+    948436,
+    5244
+   ],
+   "nrm": [
+    953680,
+    1312
+   ],
+   "idx": [
+    954992,
+    5220
+   ],
+   "verts": 437,
+   "tris": 870,
+   "dtype": "u16"
+  },
+  "tarsus_T3_1_right_body": {
+   "pos": [
+    960212,
+    5316
+   ],
+   "nrm": [
+    965528,
+    1332
+   ],
+   "idx": [
+    966860,
+    5276
+   ],
+   "verts": 443,
+   "tris": 879,
+   "dtype": "u16"
+  },
+  "tarsus_T3_2_left_body": {
+   "pos": [
+    972136,
+    3672
+   ],
+   "nrm": [
+    975808,
+    920
+   ],
+   "idx": [
+    976728,
+    3624
+   ],
+   "verts": 306,
+   "tris": 604,
+   "dtype": "u16"
+  },
+  "tarsus_T3_2_right_body": {
+   "pos": [
+    980352,
+    3660
+   ],
+   "nrm": [
+    984012,
+    916
+   ],
+   "idx": [
+    984928,
+    3620
+   ],
+   "verts": 305,
+   "tris": 603,
+   "dtype": "u16"
+  },
+  "tarsus_T3_3_left_body": {
+   "pos": [
+    988548,
+    3804
+   ],
+   "nrm": [
+    992352,
+    952
+   ],
+   "idx": [
+    993304,
+    3732
+   ],
+   "verts": 317,
+   "tris": 622,
+   "dtype": "u16"
+  },
+  "tarsus_T3_3_right_body": {
+   "pos": [
+    997036,
+    3756
+   ],
+   "nrm": [
+    1000792,
+    940
+   ],
+   "idx": [
+    1001732,
+    3684
+   ],
+   "verts": 313,
+   "tris": 614,
+   "dtype": "u16"
+  },
+  "tarsus_T3_4_left_body": {
+   "pos": [
+    1005416,
+    3864
+   ],
+   "nrm": [
+    1009280,
+    968
+   ],
+   "idx": [
+    1010248,
+    3792
+   ],
+   "verts": 322,
+   "tris": 632,
+   "dtype": "u16"
+  },
+  "tarsus_T3_4_right_body": {
+   "pos": [
+    1014040,
+    3816
+   ],
+   "nrm": [
+    1017856,
+    956
+   ],
+   "idx": [
+    1018812,
+    3740
+   ],
+   "verts": 318,
+   "tris": 623,
+   "dtype": "u16"
+  },
+  "thorax_black": {
+   "pos": [
+    1022552,
+    23016
+   ],
+   "nrm": [
+    1045568,
+    5756
+   ],
+   "idx": [
+    1051324,
+    7784
+   ],
+   "verts": 1918,
+   "tris": 1297,
+   "dtype": "u16"
+  },
+  "thorax_body": {
+   "pos": [
+    1059108,
+    61464
+   ],
+   "nrm": [
+    1120572,
+    15368
+   ],
+   "idx": [
+    1135940,
+    62088
+   ],
+   "verts": 5122,
+   "tris": 10348,
+   "dtype": "u16"
+  },
+  "tibia_T1_left_body": {
+   "pos": [
+    1198028,
+    3996
+   ],
+   "nrm": [
+    1202024,
+    1000
+   ],
+   "idx": [
+    1203024,
+    3980
+   ],
+   "verts": 333,
+   "tris": 663,
+   "dtype": "u16"
+  },
+  "tibia_T1_right_body": {
+   "pos": [
+    1207004,
+    3912
+   ],
+   "nrm": [
+    1210916,
+    980
+   ],
+   "idx": [
+    1211896,
+    3908
+   ],
+   "verts": 326,
+   "tris": 651,
+   "dtype": "u16"
+  },
+  "tibia_T2_left_body": {
+   "pos": [
+    1215804,
+    3516
+   ],
+   "nrm": [
+    1219320,
+    880
+   ],
+   "idx": [
+    1220200,
+    3500
+   ],
+   "verts": 293,
+   "tris": 583,
+   "dtype": "u16"
+  },
+  "tibia_T2_right_body": {
+   "pos": [
+    1223700,
+    3552
+   ],
+   "nrm": [
+    1227252,
+    888
+   ],
+   "idx": [
+    1228140,
+    3536
+   ],
+   "verts": 296,
+   "tris": 589,
+   "dtype": "u16"
+  },
+  "tibia_T3_left_body": {
+   "pos": [
+    1231676,
+    4668
+   ],
+   "nrm": [
+    1236344,
+    1168
+   ],
+   "idx": [
+    1237512,
+    4692
+   ],
+   "verts": 389,
+   "tris": 782,
+   "dtype": "u16"
+  },
+  "tibia_T3_right_body": {
+   "pos": [
+    1242204,
+    4584
+   ],
+   "nrm": [
+    1246788,
+    1148
+   ],
+   "idx": [
+    1247936,
+    4652
+   ],
+   "verts": 382,
+   "tris": 775,
+   "dtype": "u16"
+  },
+  "wing_left_brown": {
+   "pos": [
+    1252588,
+    2136
+   ],
+   "nrm": [
+    1254724,
+    536
+   ],
+   "idx": [
+    1255260,
+    596
+   ],
+   "verts": 178,
+   "tris": 99,
+   "dtype": "u16"
+  },
+  "wing_left_membrane": {
+   "pos": [
+    1255856,
+    888
+   ],
+   "nrm": [
+    1256744,
+    224
+   ],
+   "idx": [
+    1256968,
+    468
+   ],
+   "verts": 74,
+   "tris": 78,
+   "dtype": "u16"
+  },
+  "wing_right_brown": {
+   "pos": [
+    1257436,
+    2160
+   ],
+   "nrm": [
+    1259596,
+    540
+   ],
+   "idx": [
+    1260136,
+    608
+   ],
+   "verts": 180,
+   "tris": 101,
+   "dtype": "u16"
+  },
+  "wing_right_membrane": {
+   "pos": [
+    1260744,
+    888
+   ],
+   "nrm": [
+    1261632,
+    224
+   ],
+   "idx": [
+    1261856,
+    464
+   ],
+   "verts": 74,
+   "tris": 77,
+   "dtype": "u16"
+  }
+ },
+ "rig": {
+  "body": [
+   "thorax_body",
+   "thorax_black",
+   "head_body",
+   "head_black",
+   "head_red",
+   "head_ocelli",
+   "abdomen_1_body",
+   "abdomen_2_body",
+   "abdomen_3_body",
+   "abdomen_4_body",
+   "abdomen_5_body",
+   "abdomen_6_body",
+   "abdomen_7_body",
+   "abdomen_8_body",
+   "abdomen_1_lower",
+   "abdomen_2_lower",
+   "abdomen_3_lower",
+   "abdomen_4_lower",
+   "abdomen_5_lower",
+   "abdomen_6_lower",
+   "abdomen_7_lower",
+   "haltere_left_body",
+   "haltere_right_body",
+   "antenna_left_body",
+   "antenna_left_black",
+   "antenna_right_body",
+   "antenna_right_black"
+  ],
+  "proboscis": {
+   "pivot": [
+    -6.468267628370254e-05,
+    -0.08321602180339893,
+    0.20708630054049726
+   ],
+   "meshes": [
+    "rostrum_body",
+    "haustellum_body",
+    "labrum_left_lower",
+    "labrum_right_lower"
+   ]
+  },
+  "wings": [
+   {
+    "side": 1,
+    "hinge": [
+     0.10321779916579478,
+     0.021742638250202142,
+     -0.0165817482919124
+    ],
+    "meshes": [
+     "wing_left_membrane",
+     "wing_left_brown"
+    ]
+   },
+   {
+    "side": -1,
+    "hinge": [
+     -0.10321779916579478,
+     0.021742638250202142,
+     -0.0165817482919124
+    ],
+    "meshes": [
+     "wing_right_membrane",
+     "wing_right_brown"
+    ]
+   }
+  ],
+  "legs": [
+   {
+    "row": "T1",
+    "side": "left",
+    "sign": 1,
+    "hip": {
+     "pos": [
+      0.04993638894826645,
+      -0.06498898465994486,
+      0.07574083873971516
+     ],
+     "meshes": [
+      "coxa_T1_left_body",
+      "femur_T1_left_body"
+     ]
+    },
+    "knee": {
+     "pos": [
+      0.07906147547825342,
+      -0.0013465819287485498,
+      0.045055723108249804
+     ],
+     "meshes": [
+      "tibia_T1_left_body",
+      "tarsus_T1_1_left_body",
+      "tarsus_T1_2_left_body",
+      "tarsus_T1_3_left_body",
+      "tarsus_T1_4_left_body",
+      "tarsal_claw_T1_left_brown"
+     ]
+    }
+   },
+   {
+    "row": "T1",
+    "side": "right",
+    "sign": -1,
+    "hip": {
+     "pos": [
+      -0.04993638894826645,
+      -0.06498898465994486,
+      0.07574083873971516
+     ],
+     "meshes": [
+      "coxa_T1_right_body",
+      "femur_T1_right_body"
+     ]
+    },
+    "knee": {
+     "pos": [
+      -0.07852501998025525,
+      -0.0006500969759360709,
+      0.04977899708815106
+     ],
+     "meshes": [
+      "tibia_T1_right_body",
+      "tarsus_T1_1_right_body",
+      "tarsus_T1_2_right_body",
+      "tarsus_T1_3_right_body",
+      "tarsus_T1_4_right_body",
+      "tarsal_claw_T1_right_brown"
+     ]
+    }
+   },
+   {
+    "row": "T2",
+    "side": "left",
+    "sign": 1,
+    "hip": {
+     "pos": [
+      0.057582151849436436,
+      -0.10154528853116385,
+      -0.034405933055264924
+     ],
+     "meshes": [
+      "coxa_T2_left_body",
+      "femur_T2_left_body"
+     ]
+    },
+    "knee": {
+     "pos": [
+      0.12160457686717327,
+      0.04666682509114241,
+      0.033554417479616835
+     ],
+     "meshes": [
+      "tibia_T2_left_body",
+      "tarsus_T2_1_left_body",
+      "tarsus_T2_2_left_body",
+      "tarsus_T2_3_left_body",
+      "tarsus_T2_4_left_body",
+      "tarsal_claw_T2_left_brown"
+     ]
+    }
+   },
+   {
+    "row": "T2",
+    "side": "right",
+    "sign": -1,
+    "hip": {
+     "pos": [
+      -0.057582151849436436,
+      -0.10154528853116385,
+      -0.034405933055264924
+     ],
+     "meshes": [
+      "coxa_T2_right_body",
+      "femur_T2_right_body"
+     ]
+    },
+    "knee": {
+     "pos": [
+      -0.12432555256143557,
+      0.046314627529039795,
+      0.0339020911413834
+     ],
+     "meshes": [
+      "tibia_T2_right_body",
+      "tarsus_T2_1_right_body",
+      "tarsus_T2_2_right_body",
+      "tarsus_T2_3_right_body",
+      "tarsus_T2_4_right_body",
+      "tarsal_claw_T2_right_brown"
+     ]
+    }
+   },
+   {
+    "row": "T3",
+    "side": "left",
+    "sign": 1,
+    "hip": {
+     "pos": [
+      0.0458745774070199,
+      -0.09604989644594791,
+      -0.09007664417940886
+     ],
+     "meshes": [
+      "coxa_T3_left_body",
+      "femur_T3_left_body"
+     ]
+    },
+    "knee": {
+     "pos": [
+      0.09780655741873631,
+      0.04689555727012041,
+      -0.1347616272706091
+     ],
+     "meshes": [
+      "tibia_T3_left_body",
+      "tarsus_T3_1_left_body",
+      "tarsus_T3_2_left_body",
+      "tarsus_T3_3_left_body",
+      "tarsus_T3_4_left_body",
+      "tarsal_claw_T3_left_brown"
+     ]
+    }
+   },
+   {
+    "row": "T3",
+    "side": "right",
+    "sign": -1,
+    "hip": {
+     "pos": [
+      -0.0458745774070199,
+      -0.09604989644594791,
+      -0.09007664417940886
+     ],
+     "meshes": [
+      "coxa_T3_right_body",
+      "femur_T3_right_body"
+     ]
+    },
+    "knee": {
+     "pos": [
+      -0.09567326606483761,
+      0.047417124562664406,
+      -0.13241222185198107
+     ],
+     "meshes": [
+      "tibia_T3_right_body",
+      "tarsus_T3_1_right_body",
+      "tarsus_T3_2_right_body",
+      "tarsus_T3_3_right_body",
+      "tarsus_T3_4_right_body",
+      "tarsal_claw_T3_right_brown"
+     ]
+    }
+   }
+  ]
+ }
+}

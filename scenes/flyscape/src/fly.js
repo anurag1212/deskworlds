@@ -158,12 +158,14 @@ function buildAnatomy() {
   return { group, body, wings, legs, proboscis: proboscisPivot };
 }
 
-function createFly(index, random) {
-  const anatomy = buildAnatomy();
+function createFly(index, random, bodyFactory) {
+  const anatomy = bodyFactory ? bodyFactory() : buildAnatomy();
   const fly = {
     id: index,
     group: anatomy.group,
     parts: anatomy,
+    // Thorax height above the feet: the anatomical rig measures its own.
+    reach: anatomy.reach ?? LEG_REACH,
     mode: "rest",
     modeTime: 0,
     timer: 0.5 + random() * 2,
@@ -199,10 +201,11 @@ export function createFlies(scene, {
   supportHeight = () => 0,
   surfaceAt = () => null,
   seed = 43107,
+  bodyFactory = null,
 } = {}) {
   const flies = [];
   for (let index = 0; index < FLY_COUNT; index++)
-    flies.push(createFly(index, randomGenerator(seed + index * 7919)));
+    flies.push(createFly(index, randomGenerator(seed + index * 7919), bodyFactory));
 
   const stats = {
     takeoffs: 0,
@@ -447,7 +450,7 @@ export function createFlies(scene, {
         fly.timer -= dt;
         // A crouch that releases: the legs compress, then the fly is airborne.
         const crouch = Math.max(0, Math.sin(Math.min(1, fly.modeTime / 0.42) * Math.PI));
-        fly.parts.body.position.y = LEG_REACH - crouch * 0.06;
+        fly.parts.body.position.y = fly.reach - crouch * 0.06;
         if (fly.timer <= 0) {
           fly.mode = "fly";
           fly.modeTime = 0;
@@ -528,7 +531,7 @@ export function createFlies(scene, {
         const speed = fly.velocity.length();
         if (speed > maxSpeed) fly.velocity.multiplyScalar(maxSpeed / speed);
         position.addScaledVector(fly.velocity, dt);
-        const floor = supportHeight(position.x, position.z) + LEG_REACH * 0.4;
+        const floor = supportHeight(position.x, position.z) + fly.reach * 0.4;
         position.y = clamp(position.y, floor, bounds.maxY);
         position.x = clamp(position.x, bounds.minX, bounds.maxX);
         position.z = clamp(position.z, bounds.minZ, bounds.maxZ);
@@ -656,7 +659,7 @@ export function createFlies(scene, {
       fly.parts.body.rotation.x = damp(fly.parts.body.rotation.x, pitch, 8, dt);
       fly.parts.body.rotation.z = damp(fly.parts.body.rotation.z, bank, 8, dt);
       fly.bobPhase += dt * 18;
-      fly.parts.body.position.y = LEG_REACH + Math.sin(fly.bobPhase) * 0.02;
+      fly.parts.body.position.y = fly.reach + Math.sin(fly.bobPhase) * 0.02;
     } else {
       fly.parts.body.rotation.x = damp(fly.parts.body.rotation.x, 0, 10, dt);
       fly.parts.body.rotation.z = damp(fly.parts.body.rotation.z, 0, 10, dt);
@@ -665,7 +668,7 @@ export function createFlies(scene, {
         // The crouch owns the body height until the wings take over.
       } else {
         const idle = Math.sin(time * 1.7 + fly.id) * 0.006;
-        fly.parts.body.position.y = LEG_REACH + idle;
+        fly.parts.body.position.y = fly.reach + idle;
         if (fly.mode === "eat")
           fly.parts.proboscis.scale.y = Math.max(fly.parts.proboscis.scale.y, 0.45);
         else if (fly.mode !== "groom")

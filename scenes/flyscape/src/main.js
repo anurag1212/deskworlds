@@ -7,6 +7,7 @@ import { createFood } from "./food.js";
 import { createBrain } from "./brain.js";
 import { createConnectomeBrain, loadPack } from "./connectome.js";
 import { createBrainView } from "./brainview.js";
+import { loadFlybodyPack, createFlybodyRigFactory } from "./flybody.js";
 import { clamp, randomGenerator } from "./math.js";
 import { createFrameLoop } from "../../shared/frame-loop.js";
 import { renderSettings, framebufferSize } from "./render-policy.js";
@@ -111,6 +112,16 @@ async function start() {
   const environment = createEnvironment(scene);
   const motes = createMotes(scene);
   const food = createFood(scene, { supportHeight: environment.supportHeight });
+  // The anatomical fly meshes (FlyBody, Apache-2.0, packed by
+  // tools/fetch_flybody_pack.py). A clone without the pack keeps the
+  // procedural anatomy: nothing here may assume the fetch succeeds.
+  const flybodyPack = await loadFlybodyPack(
+    new URL("../data-flybody", import.meta.url).href,
+  ).catch((error) => {
+    console.warn("flyscape: flybody pack missing, procedural flies;", error.message);
+    return null;
+  });
+  const bodyFactory = flybodyPack ? createFlybodyRigFactory(flybodyPack) : null;
   let brain = createBrain({ seed: 20261016 });
   let brainView = null;
   // The connectome engine upgrades the placeholder once its pack loads. A fresh
@@ -150,6 +161,7 @@ async function start() {
     supportHeight: environment.supportHeight,
     surfaceAt: environment.surfaceAt,
     seed: 43107,
+    bodyFactory,
   });
 
   // The world reacts to the cursor the way a fly reacts to a hand: a slow approach is

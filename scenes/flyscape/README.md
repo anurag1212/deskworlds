@@ -44,6 +44,14 @@ descending highway and seized at any real drive (measured, then fixed — see
 `tools/fetch_malecns_pack.py`). The Shiu constants were fitted to FlyWire, not
 to this male specimen, and the pack records that plainly.
 
+The **anatomy** (committed, `data-flybody/`): the flies are the real FlyBody
+meshes (TuragaLab/flybody, Apache-2.0) — thorax, head with compound eyes,
+eight abdomen segments, folded wings with membranes and veins, and six
+five-segment legs with claws, decimated and baked into the same rig frames the
+procedural body used. `tools/fetch_flybody_pack.py` rebuilds them from the
+original assets; `src/flybody.js` assembles the rig. A clone without the pack
+falls back to the procedural anatomy, and the node tests keep using it.
+
 The **Brain** button (preview only, key `B`) opens the live brain window:
 the full CNS soma cloud (brain + ventral nerve cord) at real positions, the
 watched fly's spikes flashing where they fire in both circuits, per-population
