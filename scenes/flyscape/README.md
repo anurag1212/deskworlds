@@ -54,8 +54,10 @@ falls back to the procedural anatomy, and the node tests keep using it.
 
 The **Brain** button (preview only, key `B`) opens the live brain window:
 the full CNS soma cloud (brain + ventral nerve cord) at real positions, the
-watched fly's spikes flashing where they fire in both circuits, per-population
-rates including cord tone, and a fly switcher.
+watched fly's spikes flashing where they fire in both circuits, a scrolling
+spike raster of the identified populations (loom, giant fiber, vision, steer,
+taste, feed, walk, motor pools), per-population rates including cord tone, and
+a fly switcher. In the wallpaper it is the menu bar's **Show Brain** item.
 
 The candidates for that engine, and the reasons they were shortlisted, are recorded in
 the research notes that seeded this scene (see [awesome-fly](https://github.com/cobanov/awesome-fly)

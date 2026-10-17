@@ -14,9 +14,24 @@ const ROLE_COLORS = {
   mdn: "#8ce0d4", escw: "#ffd94d", sugar: "#ff7d7d", proboscis_mn: "#ff7d7d",
   other: "#3a4a5a",
 };
+// Raster rows, top to bottom: the watched fly's identified populations, then
+// the cord's motor pools. Roles not listed here never draw (their spikes are
+// the anatomical cloud's business, not the circuit readout's).
+const RASTER_ROWS = [
+  { label: "loom", roles: { lc4: "#7fd4ff", lplc2: "#7fd4ff" } },
+  { label: "GF", roles: { gf: "#ffd94d" } },
+  { label: "vision", roles: { lc10a: "#b48cff" } },
+  { label: "steer", roles: { dna01: "#ff9d5c", dna02: "#ff9d5c" } },
+  { label: "taste", roles: { sugar: "#ff7d7d" } },
+  { label: "feed", roles: { proboscis_mn: "#ff7d7d" } },
+  { label: "walk", roles: { dnp09: "#8ce08c", dng11: "#e08cc8", mdn: "#8ce0d4", escw: "#ffd94d" } },
+  { label: "motor", roles: null }, // any mn_* role from the cord
+];
 export function createBrainView(panel, pack, brain, { flies = 4 } = {}) {
   const canvas = panel.querySelector("canvas");
   const ctx = canvas.getContext("2d");
+  const raster = panel.querySelector(".brain-raster");
+  const rctx = raster.getContext("2d");
   const readout = panel.querySelector(".brain-rates");
   const switcher = panel.querySelector(".brain-flies");
   const heading = panel.querySelector("h2");
@@ -47,6 +62,52 @@ export function createBrainView(panel, pack, brain, { flies = 4 } = {}) {
     const size = Math.min(300, Math.floor(bounds.width));
     canvas.width = size;
     canvas.height = size;
+    raster.width = size;
+    raster.height = Math.round(size * 64 / 300);
+  }
+
+  // One raster column per frame: shift the strip left, plot this frame's
+  // identified spikes at the right edge, then redraw the fixed row labels.
+  function drawRaster() {
+    const w = raster.width, h = raster.height;
+    rctx.globalCompositeOperation = "copy";
+    rctx.drawImage(raster, -1, 0);
+    rctx.globalCompositeOperation = "source-over";
+    const rows = RASTER_ROWS.length;
+    const rowH = h / rows;
+    const plot = (role, vnc) => {
+      for (let r = 0; r < rows; r++) {
+        const spec = RASTER_ROWS[r];
+        const colour = spec.roles
+          ? spec.roles[role]
+          : (vnc && role.startsWith("mn_") ? "#8ce08c" : null);
+        if (!colour) continue;
+        rctx.fillStyle = colour;
+        rctx.fillRect(w - 1, r * rowH + 1, 1, rowH - 2);
+        return;
+      }
+    };
+    const neurons = pack.neurons;
+    for (const s of brain.recent(watched)) plot(neurons[s].role, false);
+    if (brain.recentVnc && pack.vnc) {
+      const vneurons = pack.vnc.neurons;
+      for (const s of brain.recentVnc(watched)) plot(vneurons[s].role, true);
+    }
+    // Labels and separators are a fixed overlay, redrawn every frame: the
+    // strip itself scrolls under them.
+    rctx.font = `${Math.max(7, Math.round(rowH * 0.62))}px system-ui, sans-serif`;
+    rctx.textBaseline = "middle";
+    for (let r = 0; r < rows; r++) {
+      rctx.fillStyle = "rgba(10,13,18,0.88)";
+      rctx.fillRect(0, r * rowH, 40, rowH);
+      rctx.fillStyle = "rgba(160,180,205,0.55)";
+      rctx.fillText(RASTER_ROWS[r].label, 3, (r + 0.5) * rowH);
+      rctx.strokeStyle = "rgba(140,170,210,0.12)";
+      rctx.beginPath();
+      rctx.moveTo(0, (r + 1) * rowH);
+      rctx.lineTo(w, (r + 1) * rowH);
+      rctx.stroke();
+    }
   }
 
   function draw(dt) {
@@ -75,6 +136,7 @@ export function createBrainView(panel, pack, brain, { flies = 4 } = {}) {
       for (const s of brain.recentVnc(watched)) glowVnc[s] = 1;
       drawGlow(pack.vnc.neurons, glowVnc, cos, sin, cx, scale, size);
     }
+    drawRaster();
   }
 
   function drawGlow(neurons, buffer, cos, sin, cx, scale, size) {
