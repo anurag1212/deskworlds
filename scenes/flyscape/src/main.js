@@ -53,6 +53,17 @@ window.scenePower = (battery) => {
 // nobody is drawing is sugar the flies never smell, and it would all arrive at once
 // whenever the world started again.
 let sprinkle = null;
+// The live brain window, for the wallpaper's menu as well as the preview's
+// button: the host calls sceneBrain(true/false) before or after the pack
+// loads, so the intent is kept and applied when the view is ready.
+let brainWanted = false;
+let brainView = null;
+let setBrainVisible = (on) => {
+  brainWanted = Boolean(on);
+  brainView?.setVisible(brainWanted);
+  document.querySelector("#brain")?.setAttribute("aria-pressed", String(brainWanted));
+};
+window.sceneBrain = setBrainVisible;
 window.sceneFeed = () => {
   if (sprinkle && loop?.state.running) sprinkle();
 };
@@ -124,7 +135,6 @@ async function start() {
   });
   const bodyFactory = flybodyPack ? createFlybodyRigFactory(flybodyPack) : null;
   let brain = createBrain({ seed: 20261016 });
-  let brainView = null;
   // The connectome engine upgrades the placeholder once its pack loads. A fresh
   // clone without generated data keeps the scripted circuit: nothing here may
   // assume the fetch succeeds.
@@ -133,24 +143,19 @@ async function start() {
       brain = createConnectomeBrain(pack, { flies: flies.flies.length });
       const panel = document.querySelector("#brain-panel");
       const toggle = document.querySelector("#brain");
-      if (panel && toggle) {
+      if (panel) {
         brainView = createBrainView(panel, pack, brain, { flies: flies.flies.length });
-        toggle.disabled = false;
-        toggle.addEventListener("click", () => {
-          brainView.setVisible(!brainView.visible);
-          toggle.setAttribute("aria-pressed", String(brainView.visible));
-        });
+        if (toggle) {
+          toggle.disabled = false;
+          toggle.addEventListener("click", () => setBrainVisible(!brainView.visible));
+        }
         document.addEventListener("keydown", (event) => {
           if (event.repeat || event.target.closest("button,select,input,textarea,a,[contenteditable]")) return;
-          if (event.key.toLowerCase() === "b") {
-            brainView.setVisible(!brainView.visible);
-            toggle.setAttribute("aria-pressed", String(brainView.visible));
-          }
+          if (event.key.toLowerCase() === "b") setBrainVisible(!brainView.visible);
         });
-        if (query.get("brain") === "1") {
-          brainView.setVisible(true);
-          toggle.setAttribute("aria-pressed", "true");
-        }
+        if (query.get("brain") === "1") setBrainVisible(true);
+        // The wallpaper host may have asked before the pack landed.
+        setBrainVisible(brainWanted);
       }
     },
     (error) => console.warn("flyscape: connectome pack missing, placeholder brain;", error.message),

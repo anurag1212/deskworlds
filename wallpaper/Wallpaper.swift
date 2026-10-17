@@ -115,6 +115,7 @@ final class Wallpaper: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
   let window: DesktopWindow
   let view: WKWebView
   private var loaded = false
+  private var brain = false
   private var inside = false
   private var rate = 0
   private var battery = false
@@ -239,7 +240,16 @@ final class Wallpaper: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
       """
       typeof scenePower === 'function' && scenePower(\(battery ? "true" : "false"));
       typeof sceneRate === 'function' && sceneRate(\(rate));
+      typeof sceneBrain === 'function' && sceneBrain(\(brain ? "true" : "false"));
       """)
+  }
+
+  /// The live brain window, toggled from the menu bar. Only Fly world answers
+  /// the call; every other scene ignores it.
+  func setBrain(_ on: Bool) {
+    guard brain != on else { return }
+    brain = on
+    send()
   }
 
   /// A pinch of food, asked for from the menu rather than by clicking. The
@@ -328,8 +338,11 @@ final class Controller: NSObject, NSApplicationDelegate, NSMenuDelegate {
   private let state = NSMenuItem()
   private let pause = NSMenuItem()
   private let feed = NSMenuItem()
+  private let brainItem = NSMenuItem()
   private var worldItems: [NSMenuItem] = []
   private var world = World.selected
+  /// Whether the live brain window is shown. Only Fly world draws it.
+  private var brainShown = UserDefaults.standard.bool(forKey: "brain")
   private var applied = 0
   private var pointerTimer: Timer?
   private var pointerRate = 0
@@ -434,6 +447,7 @@ final class Controller: NSObject, NSApplicationDelegate, NSMenuDelegate {
     layout = NSScreen.screens.map(\.frame)
     for screen in screens { screen.close() }
     screens = NSScreen.screens.map { Wallpaper(screen: $0, root: root, world: world) }
+    for screen in screens { screen.setBrain(brainShown) }
     applyRate()
   }
 
@@ -572,6 +586,10 @@ final class Controller: NSObject, NSApplicationDelegate, NSMenuDelegate {
     feed.target = self
     feed.action = #selector(feedEveryScreen)
     menu.addItem(feed)
+    brainItem.title = "Show Brain"
+    brainItem.target = self
+    brainItem.action = #selector(toggleBrain)
+    menu.addItem(brainItem)
     pause.target = self
     pause.action = #selector(togglePause)
     menu.addItem(pause)
@@ -611,6 +629,9 @@ final class Controller: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // again and then all arrive at once, so Feed says so rather than promising a feeding.
     feed.isEnabled = applied > 0 && world.canFeed
     feed.title = world.feedTitle
+    // The brain window only exists in Fly world; everywhere else the item says so.
+    brainItem.state = brainShown ? .on : .off
+    brainItem.isEnabled = world == .flyscape
   }
 
   /// Every screen, because each one runs its own world rather than one
@@ -618,6 +639,13 @@ final class Controller: NSObject, NSApplicationDelegate, NSMenuDelegate {
   /// would leave the others unfed.
   @objc private func feedEveryScreen() {
     for screen in screens { screen.feed() }
+  }
+
+  /// Fly world's live brain window, on every screen, remembered across restarts.
+  @objc private func toggleBrain() {
+    brainShown.toggle()
+    UserDefaults.standard.set(brainShown, forKey: "brain")
+    for screen in screens { screen.setBrain(brainShown) }
   }
 
   /// Every screen changes together: the scenes are separate worlds, not one world with

@@ -29,7 +29,7 @@ To update, pull the latest source and run the installer again. To remove it, run
 
 ## Usage
 
-Click the Deskworlds icon in the menu bar to switch worlds, feed the creatures, stir the fire, or pause. Desktop icons and clicks work as usual.
+Click the Deskworlds icon in the menu bar to switch worlds, feed the creatures, stir the fire, or pause. In Fly world, **Show Brain** opens the live brain window: the fly's nervous system at real soma positions, spikes flashing where they fire, with population rates. Desktop icons and clicks work as usual.
 
 The wallpaper lowers its frame rate on battery or when windows cover the desktop, and stops when the desktop is hidden, the screen is locked, or Low Power Mode is on. It reads your cursor position and window sizes for this, but does not record keystrokes or request any special permissions.
 
