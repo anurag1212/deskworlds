@@ -1,72 +1,80 @@
 @import url("../../ui/scene.css");
 #stage { height: 100dvh; }
-#brain-panel {
+
+/* The brain HUD: a bottom instrument bar, one card per fly, always on. */
+#brain-hud {
   position: absolute;
-  top: 3.2rem;
-  right: 0.8rem;
-  width: min(21rem, 80vw);
-  max-height: calc(100dvh - 7rem);
-  overflow: auto;
-  background: rgba(8, 11, 16, 0.88);
-  border: 1px solid rgba(140, 170, 210, 0.25);
-  border-radius: 0.6rem;
-  padding: 0.7rem 0.8rem 0.8rem;
-  color: #cfd9e6;
-  font-size: 0.78rem;
+  left: 50%;
+  bottom: 0.9rem;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.6rem;
+  max-width: min(1180px, calc(100vw - 2rem));
+  padding: 0.55rem;
+  border-radius: 0.7rem;
+  background: rgba(9, 12, 17, 0.72);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(140, 170, 210, 0.18);
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.45);
   z-index: 5;
 }
-#brain-panel[hidden] { display: none; }
-#brain-panel h2 {
-  margin: 0 0 0.4rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+#brain-hud[hidden] { display: none; }
+.brain-card {
+  display: flex;
+  gap: 0.55rem;
+  align-items: stretch;
 }
-#brain-panel canvas {
-  display: block;
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 0.4rem;
+.brain-card canvas.brain-cloud {
+  width: 132px;
+  height: 132px;
+  border-radius: 0.45rem;
   background: #0a0d12;
 }
-.brain-flies { display: flex; gap: 0.35rem; margin: 0.5rem 0 0.4rem; }
-.brain-raster {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin-top: 0.4rem;
-  border-radius: 0.3rem;
-  background: #0a0d12;
-}
-.brain-flies button {
+.brain-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 240px;
+  max-width: 340px;
   flex: 1;
-  background: transparent;
-  border: 1px solid rgba(140, 170, 210, 0.35);
+}
+.brain-card-title {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #cfd9e6;
+  opacity: 0.85;
+}
+canvas.brain-raster {
+  display: block;
+  width: 100%;
+  flex: 1;
+  min-height: 62px;
   border-radius: 0.35rem;
-  color: inherit;
-  font: inherit;
-  padding: 0.2rem 0;
-  cursor: pointer;
+  background: #0a0d12;
 }
-.brain-flies button[aria-pressed="true"] {
-  background: rgba(127, 212, 255, 0.18);
-  border-color: rgba(127, 212, 255, 0.7);
+.brain-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
 }
-.brain-rates > div {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0 0.6rem;
-  margin-top: 0.3rem;
+.brain-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.28rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.3rem;
+  background: rgba(127, 212, 255, 0.08);
+  border: 1px solid rgba(140, 170, 210, 0.16);
+  font-size: 0.68rem;
+  color: #cfd9e6;
 }
-.brain-bar {
-  grid-column: 1 / -1;
-  height: 0.25rem;
-  border-radius: 0.2rem;
-  background: rgba(140, 170, 210, 0.15);
-  overflow: hidden;
+.brain-chip em {
+  font-style: normal;
+  opacity: 0.6;
 }
-.brain-bar > div {
-  height: 100%;
-  background: #7fd4ff;
+.brain-chip b {
+  font-weight: 600;
+  color: #9fdcff;
 }
-#brain-panel p { opacity: 0.65; margin: 0.5rem 0 0; }

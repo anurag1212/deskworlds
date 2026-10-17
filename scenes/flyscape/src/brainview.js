@@ -1,10 +1,14 @@
-// The brain window: the soma cloud with live spikes.
+// The brain window: a live instrument panel for every fly, always on.
 //
-// A 2D canvas overlay (one extra WebGL context would compete with the scene's):
-// all ~23k soma positions from brain_points.json projected in a slow rotation,
-// dark until a spike fires, then flashing at the spiking circuit neuron's soma.
-// The watched fly's identified populations get live rate readouts; buttons switch
-// between the four flies. Preview only: the wallpaper has no chrome to hang it on.
+// A bottom HUD with one card per fly (one, to begin with). Each card is the
+// same three instruments, side by side:
+//   * the fly's soma cloud — the full CNS at real positions, spikes flashing
+//     where they fire, slowly turning;
+//   * an 8-row spike raster of its identified populations;
+//   * live rate chips: giant fiber, steering, proboscis, cord tone, whole brain.
+//
+// 2D canvases, not WebGL: a second context would compete with the scene's.
+// Preview and wallpaper share it; B (preview) and the menu's Show Brain toggle.
 
 import { clamp } from "./math.js";
 
@@ -14,9 +18,6 @@ const ROLE_COLORS = {
   mdn: "#8ce0d4", escw: "#ffd94d", sugar: "#ff7d7d", proboscis_mn: "#ff7d7d",
   other: "#3a4a5a",
 };
-// Raster rows, top to bottom: the watched fly's identified populations, then
-// the cord's motor pools. Roles not listed here never draw (their spikes are
-// the anatomical cloud's business, not the circuit readout's).
 const RASTER_ROWS = [
   { label: "loom", roles: { lc4: "#7fd4ff", lplc2: "#7fd4ff" } },
   { label: "GF", roles: { gf: "#ffd94d" } },
@@ -27,120 +28,68 @@ const RASTER_ROWS = [
   { label: "walk", roles: { dnp09: "#8ce08c", dng11: "#e08cc8", mdn: "#8ce0d4", escw: "#ffd94d" } },
   { label: "motor", roles: null }, // any mn_* role from the cord
 ];
-export function createBrainView(panel, pack, brain, { flies = 4 } = {}) {
-  const canvas = panel.querySelector("canvas");
-  const ctx = canvas.getContext("2d");
-  const raster = panel.querySelector(".brain-raster");
-  const rctx = raster.getContext("2d");
-  const readout = panel.querySelector(".brain-rates");
-  const switcher = panel.querySelector(".brain-flies");
-  const heading = panel.querySelector("h2");
-  let watched = 0;
+const CHIPS = [
+  ["GF", (d) => d.gfHz],
+  ["steer", (d) => d.steerHz],
+  ["feed", (d) => d.proboscisHz],
+  ["tone", (d) => d.legTone],
+  ["brain", (d) => d.popHz],
+];
+
+const MODE_WORDS = {
+  rest: "resting", walk: "walking", groom: "grooming", fly: "flying",
+  takeoff: "taking off", land: "landing", eat: "feeding", flee: "bolting",
+};
+
+export function createBrainView(hud, pack, brain, { flock } = {}) {
+  const flies = flock?.flies ?? [];
+  const labels = flies.length > 1;
+  const cards = flies.map((fly) => {
+    const card = document.createElement("div");
+    card.className = "brain-card";
+    const cloud = document.createElement("canvas");
+    cloud.width = 280;
+    cloud.height = 280;
+    const body = document.createElement("div");
+    body.className = "brain-card-body";
+    const title = document.createElement("div");
+    title.className = "brain-card-title";
+    const raster = document.createElement("canvas");
+    raster.className = "brain-raster";
+    raster.width = 620;
+    raster.height = 132;
+    const chips = document.createElement("div");
+    chips.className = "brain-chips";
+    body.append(title, raster, chips);
+    card.append(cloud, body);
+    hud.append(card);
+    return {
+      fly,
+      cloud,
+      cloudCtx: cloud.getContext("2d"),
+      raster,
+      rasterCtx: raster.getContext("2d"),
+      chips,
+      title,
+      glow: new Float32Array(pack.wiring.n),
+      glowVnc: pack.vnc ? new Float32Array(pack.vnc.wiring.n) : null,
+      angle: Math.random() * Math.PI * 2,
+      chipsBuilt: false,
+    };
+  });
   let visible = false;
-  let angle = 0;
-  // Per-circuit-neuron glow, decayed every frame: index -> brightness.
-  const glow = new Float32Array(pack.wiring.n);
-  const glowVnc = pack.vnc ? new Float32Array(pack.vnc.wiring.n) : null;
-  const caption = panel.querySelector("p");
-  const buttons = [];
-  for (let f = 0; f < flies; f++) {
-    const button = document.createElement("button");
-    button.textContent = `fly ${f + 1}`;
-    button.setAttribute("aria-pressed", String(f === 0));
-    button.addEventListener("click", () => {
-      watched = f;
-      heading.textContent = `fly ${f + 1} · live brain`;
-      for (const [i, b] of buttons.entries())
-        b.setAttribute("aria-pressed", String(i === f));
-    });
-    switcher.append(button);
-    buttons.push(button);
-  }
 
   function resize() {
-    const bounds = panel.getBoundingClientRect();
-    const size = Math.min(300, Math.floor(bounds.width));
-    canvas.width = size;
-    canvas.height = size;
-    raster.width = size;
-    raster.height = Math.round(size * 64 / 300);
-  }
-
-  // One raster column per frame: shift the strip left, plot this frame's
-  // identified spikes at the right edge, then redraw the fixed row labels.
-  function drawRaster() {
-    const w = raster.width, h = raster.height;
-    rctx.globalCompositeOperation = "copy";
-    rctx.drawImage(raster, -1, 0);
-    rctx.globalCompositeOperation = "source-over";
-    const rows = RASTER_ROWS.length;
-    const rowH = h / rows;
-    const plot = (role, vnc) => {
-      for (let r = 0; r < rows; r++) {
-        const spec = RASTER_ROWS[r];
-        const colour = spec.roles
-          ? spec.roles[role]
-          : (vnc && role.startsWith("mn_") ? "#8ce08c" : null);
-        if (!colour) continue;
-        rctx.fillStyle = colour;
-        rctx.fillRect(w - 1, r * rowH + 1, 1, rowH - 2);
-        return;
-      }
-    };
-    const neurons = pack.neurons;
-    for (const s of brain.recent(watched)) plot(neurons[s].role, false);
-    if (brain.recentVnc && pack.vnc) {
-      const vneurons = pack.vnc.neurons;
-      for (const s of brain.recentVnc(watched)) plot(vneurons[s].role, true);
-    }
-    // Labels and separators are a fixed overlay, redrawn every frame: the
-    // strip itself scrolls under them.
-    rctx.font = `${Math.max(7, Math.round(rowH * 0.62))}px system-ui, sans-serif`;
-    rctx.textBaseline = "middle";
-    for (let r = 0; r < rows; r++) {
-      rctx.fillStyle = "rgba(10,13,18,0.88)";
-      rctx.fillRect(0, r * rowH, 40, rowH);
-      rctx.fillStyle = "rgba(160,180,205,0.55)";
-      rctx.fillText(RASTER_ROWS[r].label, 3, (r + 0.5) * rowH);
-      rctx.strokeStyle = "rgba(140,170,210,0.12)";
-      rctx.beginPath();
-      rctx.moveTo(0, (r + 1) * rowH);
-      rctx.lineTo(w, (r + 1) * rowH);
-      rctx.stroke();
+    for (const card of cards) {
+      const bounds = card.getBoundingClientRect();
+      const size = Math.max(120, Math.round(Math.min(bounds.height, 150) * 1.4));
+      card.cloud.width = size;
+      card.cloud.height = size;
     }
   }
 
-  function draw(dt) {
-    angle += dt * 0.25;
-    const size = canvas.width;
-    if (!size) return;
-    ctx.fillStyle = "#0a0d12";
-    ctx.fillRect(0, 0, size, size);
-    const cos = Math.cos(angle), sin = Math.sin(angle);
-    const cx = size / 2, scale = size / 24;
-    // Soma cloud: dim dots, optic lobe tinted cooler than central brain.
-    for (let i = 0; i < pack.cloud.length; i += 2) {
-      const [x, y, z, cls] = pack.cloud[i];
-      const px = cx + (x * cos - z * sin) * scale;
-      const py = cx + y * scale * 0.9 - size * 0.04;
-      if (px < 0 || px > size || py < 0 || py > size) continue;
-      ctx.fillStyle = cls === 0 ? "rgba(120,150,200,0.4)" : "rgba(90,110,140,0.35)";
-      ctx.fillRect(px, py, 1.4, 1.4);
-    }
-    // Circuit spikes: the watched fly's recent spikes glow at their somas.
-    // Brain first, then cord (the MaleCNS pack spans both), each with its own
-    // position list and glow buffer.
-    for (const s of brain.recent(watched)) glow[s] = 1;
-    drawGlow(pack.neurons, glow, cos, sin, cx, scale, size);
-    if (glowVnc && brain.recentVnc) {
-      for (const s of brain.recentVnc(watched)) glowVnc[s] = 1;
-      drawGlow(pack.vnc.neurons, glowVnc, cos, sin, cx, scale, size);
-    }
-    drawRaster();
-  }
-
-  function drawGlow(neurons, buffer, cos, sin, cx, scale, size) {
-    for (let i = 0; i < buffer.length; i++) {
+  function drawGlow(ctx, neurons, buffer, cos, sin, cx, scale, size, step) {
+    for (let i = 0; i < buffer.length; i += step) {
       if (buffer[i] <= 0.02) continue;
       const neuron = neurons[i];
       const [x, y, z] = neuron.pos;
@@ -149,48 +98,119 @@ export function createBrainView(panel, pack, brain, { flies = 4 } = {}) {
       if (px < 0 || px > size || py < 0 || py > size) { buffer[i] = 0; continue; }
       ctx.fillStyle = ROLE_COLORS[neuron.role] ?? ROLE_COLORS.other;
       ctx.globalAlpha = clamp(buffer[i], 0, 1);
-      const r = neuron.role === "other" ? 1.6 : 2.6;
       ctx.beginPath();
-      ctx.arc(px, py, r, 0, 6.2832);
+      ctx.arc(px, py, neuron.role === "other" ? 1.3 : 2.2, 0, 6.2832);
       ctx.fill();
       ctx.globalAlpha = 1;
-      buffer[i] *= 0.86;
+    }
+  }
+
+  function drawCloud(card, dt) {
+    const ctx = card.cloudCtx;
+    const size = card.cloud.width;
+    if (!size) return;
+    card.angle += dt * 0.2;
+    ctx.fillStyle = "#0a0d12";
+    ctx.fillRect(0, 0, size, size);
+    const cos = Math.cos(card.angle), sin = Math.sin(card.angle);
+    const cx = size / 2, scale = size / 24;
+    // Static soma cloud, drawn at half density: it is the wallpaper of the card.
+    for (let i = 0; i < pack.cloud.length; i += 2) {
+      const [x, y, z, cls] = pack.cloud[i];
+      const px = cx + (x * cos - z * sin) * scale;
+      const py = cx + y * scale * 0.9 - size * 0.04;
+      if (px < 0 || px > size || py < 0 || py > size) continue;
+      ctx.fillStyle = cls === 0 ? "rgba(120,150,200,0.35)" : "rgba(90,110,140,0.3)";
+      ctx.fillRect(px, py, 1.2, 1.2);
+    }
+    const index = card.fly.id;
+    for (const s of brain.recent(index)) card.glow[s] = 1;
+    drawGlow(ctx, pack.neurons, card.glow, cos, sin, cx, scale, size, 1);
+    if (card.glowVnc && brain.recentVnc && pack.vnc) {
+      for (const s of brain.recentVnc(index)) card.glowVnc[s] = 1;
+      drawGlow(ctx, pack.vnc.neurons, card.glowVnc, cos, sin, cx, scale, size, 1);
+    }
+    for (let i = 0; i < card.glow.length; i++) card.glow[i] *= 0.86;
+    if (card.glowVnc) for (let i = 0; i < card.glowVnc.length; i++) card.glowVnc[i] *= 0.86;
+  }
+
+  function drawRaster(card) {
+    const ctx = card.rasterCtx;
+    const w = card.raster.width, h = card.raster.height;
+    const rows = RASTER_ROWS.length;
+    const rowH = h / rows;
+    ctx.globalCompositeOperation = "copy";
+    ctx.drawImage(card.raster, -2, 0);
+    ctx.globalCompositeOperation = "source-over";
+    const index = card.fly.id;
+    const plot = (role, vnc) => {
+      for (let r = 0; r < rows; r++) {
+        const spec = RASTER_ROWS[r];
+        const colour = spec.roles
+          ? spec.roles[role]
+          : (vnc && role.startsWith("mn_") ? "#8ce08c" : null);
+        if (!colour) continue;
+        ctx.fillStyle = colour;
+        ctx.fillRect(w - 2, r * rowH + 1, 2, rowH - 2);
+        return;
+      }
+    };
+    for (const s of brain.recent(index)) plot(pack.neurons[s].role, false);
+    if (brain.recentVnc && pack.vnc) {
+      for (const s of brain.recentVnc(index)) plot(pack.vnc.neurons[s].role, true);
+    }
+    if (labels) {
+      ctx.font = `${Math.round(rowH * 0.6)}px system-ui, sans-serif`;
+      ctx.textBaseline = "middle";
+      for (let r = 0; r < rows; r++) {
+        ctx.fillStyle = "rgba(10,13,18,0.88)";
+        ctx.fillRect(0, r * rowH, 46, rowH);
+        ctx.fillStyle = "rgba(160,180,205,0.55)";
+        ctx.fillText(RASTER_ROWS[r].label, 4, (r + 0.5) * rowH);
+        ctx.strokeStyle = "rgba(140,170,210,0.1)";
+        ctx.beginPath();
+        ctx.moveTo(0, (r + 1) * rowH);
+        ctx.lineTo(w, (r + 1) * rowH);
+        ctx.stroke();
+      }
     }
   }
 
   function refreshRates(drives) {
-    const drive = drives[watched];
-    if (!drive) return;
-    const rows = [
-      ["giant fiber", drive.gfHz ?? 0],
-      ["loom burst", drive.loomHz ?? 0],
-      ["steer R−L", drive.steerHz ?? 0],
-      ["proboscis", drive.proboscisHz ?? 0],
-      ["cord", drive.vncHz ?? 0],
-      ["leg tone", drive.legTone ?? 0],
-      ["brain", drive.popHz ?? 0],
-    ];
-    readout.replaceChildren(
-      ...rows.map(([label, hz]) => {
-        const row = document.createElement("div");
-        const name = document.createElement("span");
-        name.textContent = label;
-        const value = document.createElement("span");
-        value.textContent = `${hz.toFixed(1)} Hz`;
-        const bar = document.createElement("div");
-        bar.className = "brain-bar";
-        const fill = document.createElement("div");
-        fill.style.width = `${clamp(Math.abs(hz) / 2, 0, 100)}%`;
-        bar.append(fill);
-        row.append(name, value, bar);
-        return row;
-      }),
-    );
+    cards.forEach((card, i) => {
+      const drive = drives[i];
+      if (!drive) return;
+      card.title.textContent = `fly ${i + 1} · ${MODE_WORDS[card.fly.mode] ?? card.fly.mode}`;
+      if (!card.chipsBuilt) {
+        card.chipsBuilt = true;
+        card.chipNodes = CHIPS.map(([label]) => {
+          const chip = document.createElement("span");
+          chip.className = "brain-chip";
+          const name = document.createElement("em");
+          name.textContent = label;
+          const value = document.createElement("b");
+          chip.append(name, value);
+          card.chips.append(chip);
+          return value;
+        });
+      }
+      CHIPS.forEach(([, read], k) => {
+        const value = read(drive) ?? 0;
+        card.chipNodes[k].textContent = `${value.toFixed(1)}`;
+      });
+    });
+  }
+
+  function draw(dt) {
+    for (const card of cards) {
+      drawCloud(card, dt);
+      drawRaster(card);
+    }
   }
 
   function setVisible(value) {
     visible = value;
-    panel.hidden = !value;
+    hud.hidden = !value;
     if (value) resize();
   }
 

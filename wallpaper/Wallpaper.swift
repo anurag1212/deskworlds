@@ -341,8 +341,9 @@ final class Controller: NSObject, NSApplicationDelegate, NSMenuDelegate {
   private let brainItem = NSMenuItem()
   private var worldItems: [NSMenuItem] = []
   private var world = World.selected
-  /// Whether the live brain window is shown. Only Fly world draws it.
-  private var brainShown = UserDefaults.standard.bool(forKey: "brain")
+  /// Whether the live brain HUD is shown. Only Fly world draws it, and it is
+  /// on by default: the instrument bar is part of the world.
+  private var brainShown = (UserDefaults.standard.object(forKey: "brain") as? Bool) ?? true
   private var applied = 0
   private var pointerTimer: Timer?
   private var pointerRate = 0

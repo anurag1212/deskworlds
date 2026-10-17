@@ -53,10 +53,11 @@ window.scenePower = (battery) => {
 // nobody is drawing is sugar the flies never smell, and it would all arrive at once
 // whenever the world started again.
 let sprinkle = null;
-// The live brain window, for the wallpaper's menu as well as the preview's
+// The live brain HUD, for the wallpaper's menu as well as the preview's
 // button: the host calls sceneBrain(true/false) before or after the pack
-// loads, so the intent is kept and applied when the view is ready.
-let brainWanted = false;
+// loads, so the intent is kept and applied when the view is ready. It is on
+// by default; ?brain=0 or B turns it off.
+let brainWanted = query.get("brain") !== "0";
 let brainView = null;
 let setBrainVisible = (on) => {
   brainWanted = Boolean(on);
@@ -121,6 +122,26 @@ async function start() {
   bounce.position.set(4, 2, 12);
   scene.add(bounce);
 
+  // A small HDR environment: dark room with one warm window strip. Glossy
+  // chitin, ceramic and book cloth pick it up as soft reflections.
+  const envScene = new THREE.Scene();
+  envScene.background = new THREE.Color("#17110b");
+  const strip = new THREE.Mesh(
+    new THREE.PlaneGeometry(11, 6),
+    new THREE.MeshBasicMaterial({
+      color: new THREE.Color(2.4, 1.8, 1.15),
+      side: THREE.DoubleSide,
+    }),
+  );
+  strip.position.set(-6, 5, -8.2);
+  envScene.add(strip);
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(envScene, 0.04, 0.1, 40).texture;
+  scene.environmentIntensity = 0.5;
+  pmrem.dispose();
+  strip.geometry.dispose();
+  strip.material.dispose();
+
   const environment = createEnvironment(scene);
   const motes = createMotes(scene);
   const food = createFood(scene, { supportHeight: environment.supportHeight });
@@ -141,10 +162,10 @@ async function start() {
   loadPack(new URL("../data", import.meta.url).href).then(
     (pack) => {
       brain = createConnectomeBrain(pack, { flies: flies.flies.length });
-      const panel = document.querySelector("#brain-panel");
+      const hud = document.querySelector("#brain-hud");
       const toggle = document.querySelector("#brain");
-      if (panel) {
-        brainView = createBrainView(panel, pack, brain, { flies: flies.flies.length });
+      if (hud) {
+        brainView = createBrainView(hud, pack, brain, { flock: flies });
         if (toggle) {
           toggle.disabled = false;
           toggle.addEventListener("click", () => setBrainVisible(!brainView.visible));
@@ -153,7 +174,6 @@ async function start() {
           if (event.repeat || event.target.closest("button,select,input,textarea,a,[contenteditable]")) return;
           if (event.key.toLowerCase() === "b") setBrainVisible(!brainView.visible);
         });
-        if (query.get("brain") === "1") setBrainVisible(true);
         // The wallpaper host may have asked before the pack landed.
         setBrainVisible(brainWanted);
       }

@@ -99,14 +99,15 @@ function stage({ seed = 43107, brainSeed = 20261016 } = {}) {
   assert.equal(brain.stats.escapes, 0, "a slow approach must not fire an escape");
 }
 
-// Ninety seconds of desk life: everyone stays in the room, walks, rests, and flies
-// between the furniture without being scared by anything.
+// Three minutes of desk life: the fly stays in the room, walks, rests, grooms
+// and flies between the furniture without being scared by anything. (One fly
+// takes off on its own every ~40 s, so the window has to cover a few cycles.)
 {
   const world = stage();
   const modes = new Set();
   const KNOWN = new Set(["rest", "groom", "walk", "takeoff", "fly", "land", "eat", "flee"]);
   const bounds = world.environment.bounds;
-  world.run(90, {
+  world.run(180, {
     onFrame: () => {
       for (const fly of world.flock.flies) {
         modes.add(fly.mode);
@@ -174,7 +175,7 @@ function stage({ seed = 43107, brainSeed = 20261016 } = {}) {
 {
   const world = stage();
   world.run(40);
-  const hungry = world.flock.flies[1].group.position;
+  const hungry = world.flock.flies[0].group.position;
   const cube = world.food.drop({ x: hungry.x + 0.9, y: 0, z: hungry.z + 0.9 });
   assert.equal(world.food.available().length, 0, "sugar is not scented until it lands");
   let ate = false;

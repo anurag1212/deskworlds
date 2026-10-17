@@ -54,7 +54,7 @@ LEG_ROW = ["T1", "T2", "T3"]
 
 # Grid cells across a mesh's longest axis, per part class: enough to read as
 # anatomy at wallpaper size without shipping 140 MB of OBJ to a browser.
-CELLS = {"body": 52, "eye": 40, "proboscis": 36, "wing": 44, "leg": 34, "small": 22}
+CELLS = {"body": 64, "eye": 52, "proboscis": 44, "wing": 56, "leg": 40, "small": 26}
 TARGET_LENGTH = 0.72  # rig units, matching the procedural fly's ~0.79 span
 
 
@@ -134,6 +134,31 @@ def decimate(verts, faces, cells):
     _, uniq = np.unique(f, axis=0, return_index=True)
     f = f[np.sort(uniq)]
     return new_verts, f
+
+
+def fix_winding(verts, faces):
+    """Make faces wind outward.
+
+    FlyBody's OBJ files mix conventions: 47 of 83 parts measured negative signed
+    volume (inward winding). With backface culling on, those parts render
+    inside-out -- the "see-through fly". Closed meshes are judged by signed
+    volume; open surfaces (wings, membranes) by whether face normals point away
+    from the mesh centroid.
+    """
+    if len(faces) == 0:
+        return faces
+    a, b, c = verts[faces[:, 0]], verts[faces[:, 1]], verts[faces[:, 2]]
+    volume = float(np.einsum("ij,ij->i", a, np.cross(b, c)).sum())
+    if abs(volume) > 1e-12:
+        flip = volume < 0
+    else:
+        centroid = verts.mean(axis=0)
+        normals = np.cross(b - a, c - a)
+        centers = (a + b + c) / 3 - centroid
+        flip = float(np.einsum("ij,ij->i", normals, centers).sum()) < 0
+    if flip:
+        faces = faces[:, [0, 2, 1]]
+    return faces
 
 
 def vertex_normals(verts, faces):
@@ -289,6 +314,7 @@ def main():
     def add(name, mesh, origin, cells):
         v, faces = bake_rig(mesh, origin)
         v, faces = decimate(v, faces, cells)
+        faces = fix_winding(v, faces)
         parts[name] = (v, faces)
 
     thorax_origin = np.zeros(3)  # thorax is the model root

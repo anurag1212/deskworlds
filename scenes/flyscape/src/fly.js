@@ -14,7 +14,7 @@ import { angleDelta, clamp, damp, randomGenerator, TAU, vec } from "./math.js";
 // This is the body the connectome engine will drive. Nothing below this file's public
 // surface assumes where a drive came from.
 
-export const FLY_COUNT = 4;
+export const FLY_COUNT = 1;
 
 const WALK_SPEED = 1.05;
 const FLIGHT_SPEED = 3.7;
@@ -625,7 +625,7 @@ export function createFlies(scene, {
       const sweep = wing.rest.sweep * wing.fold + (airborne ? 0.22 : 0);
       wing.hinge.rotation.y = wing.side * sweep;
       wing.hinge.rotation.z = wing.rest.lift * wing.fold + (wing.side < 0 ? -lift : lift);
-      wing.mesh.material.opacity = 0.52 + (airborne ? 0.1 : 0);
+      wing.mesh.material.opacity = (wing.opacityBase ?? 0.52) + (airborne ? 0.08 : 0);
     }
 
     // Legs: a tripod gait while walking, a settled stance otherwise. The phase carries

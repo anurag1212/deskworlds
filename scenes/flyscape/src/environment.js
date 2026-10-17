@@ -34,8 +34,80 @@ const PAPERBACKS = [
 ];
 const MUG = { x: 5.9, z: -1.9, radius: 0.72, height: 1.06 };
 
-function boxMesh(material, width, height, depth, position) {
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), material);
+function woodTexture() {
+  const size = 512;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#5c402a";
+  ctx.fillRect(0, 0, size, size);
+  // Grain: long wavy strokes along the desk's length, darker and lighter.
+  let seed = 0x9e3779b9;
+  const rnd = () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let n = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    n = (n + Math.imul(n ^ (n >>> 7), 61 | n)) ^ n;
+    return ((n ^ (n >>> 14)) >>> 0) / 4294967296;
+  };
+  for (let i = 0; i < 90; i++) {
+    const y = rnd() * size;
+    const light = rnd() > 0.5;
+    ctx.strokeStyle = light
+      ? `rgba(150,110,74,${0.05 + rnd() * 0.09})`
+      : `rgba(46,30,18,${0.06 + rnd() * 0.12})`;
+    ctx.lineWidth = 0.6 + rnd() * 2.4;
+    ctx.beginPath();
+    let x = -20;
+    let yy = y;
+    ctx.moveTo(x, yy);
+    while (x < size + 20) {
+      x += 14 + rnd() * 26;
+      yy = y + Math.sin(x * 0.02 + i) * (3 + rnd() * 5) + (rnd() - 0.5) * 2;
+      ctx.lineTo(x, yy);
+    }
+    ctx.stroke();
+  }
+  // Fine speckle for pore.
+  for (let i = 0; i < 2600; i++) {
+    const x = rnd() * size, y = rnd() * size;
+    ctx.fillStyle = `rgba(${rnd() > 0.5 ? "30,20,12" : "140,102,66"},${0.05 + rnd() * 0.1})`;
+    ctx.fillRect(x, y, 1 + rnd(), 0.6 + rnd() * 0.8);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(3, 1.6);
+  texture.anisotropy = 4;
+  return texture;
+}
+
+function shaftTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d");
+  const gradient = ctx.createLinearGradient(0, 0, 0, 128);
+  gradient.addColorStop(0, "rgba(255,214,160,0.16)");
+  gradient.addColorStop(0.55, "rgba(255,206,150,0.07)");
+  gradient.addColorStop(1, "rgba(255,200,140,0)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 64, 128);
+  // Feather the sides too, so the sheet has no straight cut anywhere.
+  const side = ctx.createLinearGradient(0, 0, 64, 0);
+  side.addColorStop(0, "rgba(0,0,0,0)");
+  side.addColorStop(0.25, "rgba(0,0,0,1)");
+  side.addColorStop(0.75, "rgba(0,0,0,1)");
+  side.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.globalCompositeOperation = "destination-in";
+  ctx.fillStyle = side;
+  ctx.fillRect(0, 0, 64, 128);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+function boxMesh(material, width, height, depth, position) {  const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), material);
   mesh.position.copy(position);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
@@ -84,11 +156,16 @@ function stack(scene, books, startY) {
 }
 
 export function createEnvironment(scene) {
-  // The desk. A slab rather than a plane so its front edge shows a little thickness at
-  // the near rim of the frame.
+  // Procedural wood: a canvas texture with grain along the desk's length and
+  // fine speckle. Node tests have no document, so they get the flat colour.
+  const woodMap = typeof document !== "undefined" ? woodTexture() : null;
   const desk = new THREE.Mesh(
     new THREE.BoxGeometry(DESK.halfWidth * 2, 0.6, DESK.halfDepth * 2),
-    new THREE.MeshStandardMaterial({ color: 0x5c402a, roughness: 0.83 }),
+    new THREE.MeshStandardMaterial({
+      color: woodMap ? 0xffffff : 0x5c402a,
+      map: woodMap,
+      roughness: 0.72,
+    }),
   );
   desk.position.y = DESK.top - 0.3;
   desk.receiveShadow = true;
@@ -133,6 +210,25 @@ export function createEnvironment(scene) {
   upright.position.set(-6.0, 5.0, -8.26);
   scene.add(upright);
 
+  // The light itself: a faint sheet of additive haze slanting from below the
+  // sill onto the desk. Kept clear of the pane so it never washes the window.
+  if (typeof document !== "undefined") {
+    const shaft = new THREE.Mesh(
+      new THREE.PlaneGeometry(5.6, 6.4),
+      new THREE.MeshBasicMaterial({
+        map: shaftTexture(),
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
+        fog: false,
+      }),
+    );
+    shaft.position.set(-6.0, 1.35, -3.4);
+    shaft.rotation.x = -1.18;
+    scene.add(shaft);
+  }
+
   // The book stacks and the mug. The stacks land off-centre so the desk's open middle
   // stays clear for walking and for food.
   const ledges = [];
@@ -161,6 +257,14 @@ export function createEnvironment(scene) {
   handle.rotation.z = -Math.PI / 2.4;
   handle.castShadow = true;
   scene.add(handle);
+  // The opening: a dark disc just below the rim, so the mug reads as hollow.
+  const interior = new THREE.Mesh(
+    new THREE.CircleGeometry(MUG.radius * 0.88, 26),
+    new THREE.MeshStandardMaterial({ color: 0x241a12, roughness: 0.9 }),
+  );
+  interior.rotation.x = -Math.PI / 2;
+  interior.position.set(MUG.x, MUG.height - 0.06, MUG.z);
+  scene.add(interior);
   ledges.push({
     kind: "mug",
     minX: MUG.x - MUG.radius * 0.62,

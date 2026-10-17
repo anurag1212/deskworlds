@@ -55,14 +55,7 @@
         </div>
       </footer>
       <button disabled id="show-controls" title="H">Show controls</button>
-      <aside id="brain-panel" aria-label="Live fly brain" hidden>
-        <h2>fly 1 · live brain</h2>
-        <canvas width="300" height="300"></canvas>
-        <canvas class="brain-raster" width="300" height="64" aria-label="Spike raster of identified populations"></canvas>
-        <div class="brain-flies" role="group" aria-label="Watched fly"></div>
-        <div class="brain-rates" aria-live="off"></div>
-        <p>somas and raster flash where spikes fire · rates are the watched fly</p>
-      </aside>
+      <section id="brain-hud" aria-label="Live fly brains" hidden></section>
       <div id="loading" role="status"><p>Loading world…</p></div>
       <div id="error" role="alert" hidden></div>
     </main>
