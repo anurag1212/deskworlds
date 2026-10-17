@@ -11,6 +11,7 @@ import { loadFlybodyPack, createFlybodyRigFactory } from "./flybody.js";
 import { clamp, randomGenerator } from "./math.js";
 import { createFrameLoop } from "../../shared/frame-loop.js";
 import { renderSettings, framebufferSize } from "./render-policy.js";
+import { createComposite } from "./composite.js";
 
 const canvas = document.querySelector("#scene");
 const stage = document.querySelector("#stage");
@@ -164,6 +165,8 @@ async function start() {
     bodyFactory,
   });
 
+  const { target, post, postScene, postCamera } = createComposite(camera, settings);
+
   // The world reacts to the cursor the way a fly reacts to a hand: a slow approach is
   // something to keep an eye on, a fast one is a loom. The pointer is projected onto a
   // plane just above the desk, so its speed is in world units the circuit can read.
@@ -254,9 +257,13 @@ async function start() {
     zeroSize = !dimensions;
     visibility();
     if (!dimensions) return;
-    const { width, height } = dimensions;
-    if (renderer.domElement.width !== width || renderer.domElement.height !== height) {
+    const { width, height, scale } = dimensions;
+    if (target.width !== width || target.height !== height) {
       renderer.setSize(width, height, false);
+      target.setSize(width, height);
+      post.uniforms.size.value.set(width, height);
+      // Preserve the depth effect's screen-space radius as resolution changes.
+      post.uniforms.aoRadiusScale.value = scale / settings.referenceResolution;
       camera.aspect = bounds.width / bounds.height;
       camera.updateProjectionMatrix();
       forceShadows = true;
@@ -323,7 +330,10 @@ async function start() {
       shadowFrames++;
     }
     renderer.info.reset();
+    renderer.setRenderTarget(target);
     renderer.render(scene, camera);
+    renderer.setRenderTarget(null);
+    renderer.render(postScene, postCamera);
     renderedFrames++;
     if (brainView?.visible) {
       brainView.draw(dt);
@@ -344,7 +354,7 @@ async function start() {
   updateControls();
   window.sceneStats = () => ({
     profile, onBattery, resolution: settings.resolution,
-    framebuffer: [renderer.domElement.width, renderer.domElement.height],
+    framebuffer: [target.width, target.height],
     shadowSize: settings.shadowSize,
     shadowHz: Number.isFinite(settings.shadowHz) ? settings.shadowHz : "per-frame",
     renderedFrames, shadowFrames, simulationTime: time,

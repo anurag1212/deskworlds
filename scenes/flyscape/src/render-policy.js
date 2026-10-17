@@ -9,6 +9,7 @@ export const PROFILES = Object.freeze({
     // visibly while they skitter and land.
     shadowHz: Infinity,
     batteryShadowHz: Infinity,
+    aoSamples: 8,
     powerPreference: 'low-power',
   }),
   reference: Object.freeze({
@@ -16,6 +17,7 @@ export const PROFILES = Object.freeze({
     shadowSize: 4096,
     shadowHz: Infinity,
     batteryShadowHz: Infinity,
+    aoSamples: 12,
     powerPreference: 'high-performance',
   }),
 });
