@@ -67,15 +67,21 @@ for the wider ecosystem of fly-connectome projects).
 
 - `src/main.js` — the scene bootstrap: renderer, lights, pointer-as-loom, feeding,
   the fixed-step loop, and the bridge that feeds the brain seam one record per fly.
-- `src/brain.js` — the seam. Placeholder circuit today; the connectome engine's home.
-- `src/fly.js` — the procedural fly body and its behaviour machine.
+- `src/brain.js` — the seam, with the scripted placeholder (no pack built).
+- `src/lif.js` — the Shiu 2024 leaky integrate-and-fire core: exact linear update,
+  refractory shielding, delay ring, Poisson drives, silence, active-set sleeping.
+- `src/connectome.js` — pack loading and the two real circuits per fly: the FlyWire
+  brain (escape/steer/taste readouts) and the MaleCNS cord (motor-pool tone).
+- `src/brainview.js` — the live brain window: soma cloud, spike raster, rates.
+- `src/flybody.js` — the FlyBody mesh rig (anatomical flies).
+- `src/fly.js` — the fly body and its behaviour machine, rig-agnostic.
 - `src/environment.js` — the room: desk, wall, window light, books, mug, dust motes.
 - `src/food.js` — sugar cubes: falling, resting, shrinking under a bite, dissolving.
-- `src/render-policy.js` — shadow and resolution budgets for the quality profiles.
-- `tests/behavior.mjs` — headless checks: the brain contract, loom pulses and cooldown,
-  a slow approach, ninety seconds of desk life, determinism, startle and settle,
-  feeding, sugar dissolve, and the presentation caps. Run with
-  `node scenes/flyscape/tests/behavior.mjs`.
+- `src/composite.js` / `src/render-policy.js` — the AO + vignette pass and the
+  shadow/resolution budgets for the quality profiles.
+- `tests/` — headless checks: `lif.mjs` (engine semantics), `connectome.mjs`
+  (drive mapping on a micro-pack), `behavior.mjs` (the world with the placeholder).
+  Run with `node scenes/flyscape/tests/<name>.mjs`.
 
 ## Data licences, for when the connectome lands
 
